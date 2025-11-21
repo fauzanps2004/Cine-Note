@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Film, Moon, Sun, Award, LogOut } from 'lucide-react';
+import { Film, Moon, Sun, Award, LogOut, Settings } from 'lucide-react';
 import { GamificationState, User as UserType } from '../types';
 import { RankModal } from './RankModal';
 
@@ -10,9 +10,18 @@ interface NavbarProps {
   user: UserType;
   onLogout: () => void;
   reviewCount?: number;
+  onOpenSettings: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme, stats, user, onLogout, reviewCount = 0 }) => {
+export const Navbar: React.FC<NavbarProps> = ({ 
+  isDark, 
+  toggleTheme, 
+  stats, 
+  user, 
+  onLogout, 
+  reviewCount = 0,
+  onOpenSettings
+}) => {
   const [showRankModal, setShowRankModal] = useState(false);
 
   return (
@@ -67,6 +76,14 @@ export const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme, stats, user
                   aria-label="Toggle Dark Mode"
                 >
                   {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                </button>
+                
+                <button
+                  onClick={onOpenSettings}
+                  className="p-2.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors"
+                  title="Settings & API Key"
+                >
+                  <Settings size={20} />
                 </button>
 
                 <button

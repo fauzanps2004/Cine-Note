@@ -2,10 +2,22 @@ import { MovieDetails, MovieSearchResult } from '../types';
 
 const BASE_URL = 'https://www.omdbapi.com/';
 
+export const setApiKey = (key: string) => {
+  if (key) {
+    localStorage.setItem('omdb_api_key', key.trim());
+  } else {
+    localStorage.removeItem('omdb_api_key');
+  }
+};
+
 const getApiKey = () => {
+  // Prioritize localStorage key (user override) so users can update invalid env keys
+  const localKey = localStorage.getItem('omdb_api_key');
+  if (localKey) return localKey;
+
   // specific check to avoid reference errors if process is undefined in some environments
   const envKey = (typeof process !== 'undefined' && process.env && process.env.OMDB_API_KEY) ? process.env.OMDB_API_KEY : '';
-  return envKey || localStorage.getItem('omdb_api_key') || '';
+  return envKey || '';
 };
 
 export const hasApiKey = () => !!getApiKey();

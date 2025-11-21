@@ -30,13 +30,13 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this review? It will be lost like tears in rain.')) {
-      setIsDeleting(true);
-      // Wait for animation to complete before removing from data
-      setTimeout(() => {
-        onDelete(review.id);
-      }, 300);
-    }
+    // Trigger animation immediately without blocking confirm dialog
+    setIsDeleting(true);
+    
+    // Wait for animation (300ms) to complete before removing from data
+    setTimeout(() => {
+      onDelete(review.id);
+    }, 300);
   };
 
   const handleShare = async (e: React.MouseEvent) => {
@@ -113,7 +113,7 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
       className={`
         group relative flex flex-col p-5 h-96 w-full 
         ${colorClasses} 
-        ${isDeleting ? 'opacity-0 scale-90 pointer-events-none translate-y-4' : `${rotation} hover:rotate-0 hover:scale-[1.02] hover:-translate-y-2 hover:z-20`}
+        ${isDeleting ? 'opacity-0 scale-75 pointer-events-none translate-y-8' : `${rotation} hover:rotate-0 hover:scale-[1.02] hover:-translate-y-2 hover:z-20`}
         shadow-lg hover:shadow-2xl
         transition-all duration-300 ease-out cursor-default
         border-t-8 font-sans overflow-hidden
@@ -209,7 +209,7 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
         </span>
         
         <div 
-          className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
           data-html2canvas-ignore // Don't include action buttons in the screenshot
         >
           <button 
@@ -229,7 +229,7 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
 
           <button 
             onClick={handleDelete}
-            className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full transition-all duration-200"
+            className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full transition-all duration-200 hover:scale-110 active:scale-95"
             title="Delete this entry"
           >
             <Trash2 size={16} />

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Key, Save, ExternalLink } from 'lucide-react';
+import { setApiKey } from '../services/movieService';
 
 interface ApiKeyModalProps {
   onSave: () => void;
@@ -10,7 +11,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ onSave }) => {
 
   const handleSave = () => {
     if (key.trim()) {
-      localStorage.setItem('omdb_api_key', key.trim());
+      setApiKey(key);
       onSave();
     }
   };
