@@ -1,25 +1,25 @@
 import React, { useState } from 'react';
-import { Sparkles, Loader2, Film, ArrowRight } from 'lucide-react';
+import { Sparkles, Loader2, Film, X } from 'lucide-react';
 import { MOODS, VIBES } from '../constants';
 import { getMovieRecommendations } from '../services/geminiService';
 import { searchMovies } from '../services/movieService';
 import { MovieRecommendation } from '../types';
 
 export const MoodRecommender: React.FC = () => {
-  const [selectedMood, setSelectedMood] = useState<string>('');
-  const [selectedVibe, setSelectedVibe] = useState<string>('');
+  const [moodInput, setMoodInput] = useState<string>('');
+  const [vibeInput, setVibeInput] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<MovieRecommendation[]>([]);
 
   const handleGenerate = async () => {
-    if (!selectedMood || !selectedVibe) return;
+    if (!moodInput.trim() || !vibeInput.trim()) return;
 
     setLoading(true);
     setRecommendations([]);
 
     try {
       // 1. Get suggestions from Gemini
-      const aiSuggestions = await getMovieRecommendations(selectedMood, selectedVibe);
+      const aiSuggestions = await getMovieRecommendations(moodInput, vibeInput);
 
       // 2. Enrich with real posters from OMDb
       const enrichedResults = await Promise.all(
@@ -49,6 +49,12 @@ export const MoodRecommender: React.FC = () => {
     }
   };
 
+  const handleClear = () => {
+    setMoodInput('');
+    setVibeInput('');
+    setRecommendations([]);
+  };
+
   return (
     <div className="w-full mt-20 mb-10 animate-fade-in">
       <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
@@ -61,7 +67,7 @@ export const MoodRecommender: React.FC = () => {
               What's the Vibe?
             </h2>
             <p className="text-brand-100 text-sm mt-1 opacity-90">
-              Let AI curate a watchlist based on your current headspace.
+              Describe your headspace, get a curated watchlist.
             </p>
           </div>
           {/* Decorative BG */}
@@ -73,21 +79,26 @@ export const MoodRecommender: React.FC = () => {
         <div className="p-6 sm:p-8">
           {/* Controls */}
           <div className="flex flex-col md:flex-row gap-8 mb-8">
-            {/* Mood Selector */}
-            <div className="flex-1">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+            {/* Mood Input */}
+            <div className="flex-1 flex flex-col">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
                 I'm feeling...
               </label>
+              <input 
+                type="text"
+                value={moodInput}
+                onChange={(e) => setMoodInput(e.target.value)}
+                placeholder="e.g. Nostalgic, chaotic, lazy..."
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none dark:text-white transition-all mb-3"
+              />
+              
+              {/* Suggestions */}
               <div className="flex flex-wrap gap-2">
                 {MOODS.map(mood => (
                   <button
                     key={mood}
-                    onClick={() => setSelectedMood(mood)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border ${
-                      selectedMood === mood
-                        ? 'bg-brand-100 text-brand-700 border-brand-300 dark:bg-brand-900/40 dark:text-brand-300 dark:border-brand-700 ring-1 ring-brand-500/50'
-                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-brand-300 hover:bg-white dark:bg-slate-900 dark:text-slate-400 dark:border-slate-700 dark:hover:border-slate-500'
-                    }`}
+                    onClick={() => setMoodInput(mood)}
+                    className={`text-[10px] px-2 py-1 rounded-full transition-all duration-200 border border-slate-200 dark:border-slate-700 hover:bg-brand-50 dark:hover:bg-slate-700 hover:text-brand-600 dark:hover:text-brand-300 ${moodInput === mood ? 'bg-brand-100 text-brand-700 border-brand-300' : 'text-slate-500 dark:text-slate-400'}`}
                   >
                     {mood}
                   </button>
@@ -95,21 +106,26 @@ export const MoodRecommender: React.FC = () => {
               </div>
             </div>
 
-            {/* Vibe Selector */}
-            <div className="flex-1">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+            {/* Vibe Input */}
+            <div className="flex-1 flex flex-col">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
                 I want a...
               </label>
+               <input 
+                type="text"
+                value={vibeInput}
+                onChange={(e) => setVibeInput(e.target.value)}
+                placeholder="e.g. 80s sci-fi, slow burn, rainy day..."
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none dark:text-white transition-all mb-3"
+              />
+              
+              {/* Suggestions */}
               <div className="flex flex-wrap gap-2">
                 {VIBES.map(vibe => (
                   <button
                     key={vibe}
-                    onClick={() => setSelectedVibe(vibe)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border ${
-                      selectedVibe === vibe
-                        ? 'bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-700 ring-1 ring-purple-500/50'
-                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-purple-300 hover:bg-white dark:bg-slate-900 dark:text-slate-400 dark:border-slate-700 dark:hover:border-slate-500'
-                    }`}
+                    onClick={() => setVibeInput(vibe)}
+                    className={`text-[10px] px-2 py-1 rounded-full transition-all duration-200 border border-slate-200 dark:border-slate-700 hover:bg-purple-50 dark:hover:bg-slate-700 hover:text-purple-600 dark:hover:text-purple-300 ${vibeInput === vibe ? 'bg-purple-100 text-purple-700 border-purple-300' : 'text-slate-500 dark:text-slate-400'}`}
                   >
                     {vibe}
                   </button>
@@ -119,10 +135,18 @@ export const MoodRecommender: React.FC = () => {
           </div>
 
           {/* Action */}
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center mb-8 gap-4">
+             {recommendations.length > 0 && (
+                <button 
+                  onClick={handleClear}
+                  className="px-4 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                >
+                   Clear
+                </button>
+             )}
             <button
               onClick={handleGenerate}
-              disabled={!selectedMood || !selectedVibe || loading}
+              disabled={!moodInput.trim() || !vibeInput.trim() || loading}
               className="group relative px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold shadow-lg shadow-slate-500/20 disabled:opacity-50 disabled:shadow-none transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
             >
               {loading ? <Loader2 className="animate-spin" /> : <Sparkles size={18} />}
@@ -136,9 +160,9 @@ export const MoodRecommender: React.FC = () => {
               {recommendations.map((movie, idx) => (
                 <div 
                   key={idx} 
-                  className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-3 border border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-700 transition-colors group flex flex-col"
+                  className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-3 border border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-700 transition-colors group flex flex-col h-full"
                 >
-                  <div className="aspect-[2/3] bg-slate-200 dark:bg-slate-800 rounded-lg mb-3 overflow-hidden relative shadow-sm">
+                  <div className="aspect-[2/3] bg-slate-200 dark:bg-slate-800 rounded-lg mb-3 overflow-hidden relative shadow-sm shrink-0">
                     {movie.posterUrl ? (
                       <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     ) : (
@@ -149,11 +173,23 @@ export const MoodRecommender: React.FC = () => {
                   </div>
                   
                   <div className="flex-1 flex flex-col">
-                    <h3 className="font-bold text-slate-800 dark:text-white leading-tight">{movie.title}</h3>
+                    <h3 className="font-bold text-slate-800 dark:text-white leading-tight text-lg mb-0.5">{movie.title}</h3>
                     <span className="text-xs font-mono text-slate-500 dark:text-slate-400 mb-2">{movie.year}</span>
-                    <p className="text-sm text-slate-600 dark:text-slate-300 font-hand leading-snug mt-auto border-t border-slate-200 dark:border-slate-700 pt-2 italic">
-                      "{movie.reason}"
+                    
+                    {/* Plot Summary */}
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4 line-clamp-3">
+                      {movie.plot}
                     </p>
+
+                    {/* Vibe Check / Reason */}
+                    <div className="mt-auto pt-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 p-2 rounded-lg">
+                      <span className="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider block mb-1">
+                          Vibe Check
+                      </span>
+                      <p className="text-sm text-slate-800 dark:text-slate-200 font-hand leading-snug italic">
+                        "{movie.reason}"
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}

@@ -29,6 +29,7 @@ export interface Review {
 export interface MovieRecommendation {
   title: string;
   year: string;
+  plot: string;
   reason: string;
   posterUrl?: string | null;
   imdbID?: string;
