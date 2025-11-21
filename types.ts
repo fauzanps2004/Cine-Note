@@ -38,6 +38,7 @@ export interface GamificationState {
   role: UserRole;
   nextMilestone: number;
   progress: number;
+  streak: number;
 }
 
 export interface User {

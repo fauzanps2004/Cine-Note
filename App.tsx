@@ -73,8 +73,9 @@ function App() {
     }
   }, [isDark]);
 
-  // Gamification Logic
+  // Gamification Logic (Rank & Streak)
   const stats: GamificationState = useMemo(() => {
+    // 1. Calculate Rank
     const count = reviews.length;
     let currentRole = UserRole.NOVICE;
     let nextCount = 3;
@@ -91,12 +92,46 @@ function App() {
     const currentProgress = count - prevMilestone;
     const progressPercentage = Math.min(100, Math.max(0, (currentProgress / totalNeeded) * 100));
 
+    // 2. Calculate Streak
+    let currentStreak = 0;
+    if (reviews.length > 0) {
+      // Get unique dates (formatted as local date string to ignore time)
+      const uniqueDates = Array.from(new Set(reviews.map(r => new Date(r.createdAt).toDateString())));
+      
+      // Sort descending (newest first)
+      uniqueDates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+      const today = new Date().toDateString();
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+      // If the most recent review wasn't today or yesterday, streak is broken
+      if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
+        currentStreak = 1;
+        let lastDate = new Date(uniqueDates[0]);
+
+        // Check backwards for consecutive days
+        for (let i = 1; i < uniqueDates.length; i++) {
+          const prevDate = new Date(uniqueDates[i]);
+          const diffTime = Math.abs(lastDate.getTime() - prevDate.getTime());
+          const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+          if (diffDays === 1) {
+            currentStreak++;
+            lastDate = prevDate;
+          } else {
+            break; // Gap found, stop counting
+          }
+        }
+      }
+    }
+
     return {
       role: currentRole,
       nextMilestone: nextCount,
-      progress: progressPercentage
+      progress: progressPercentage,
+      streak: currentStreak
     };
-  }, [reviews.length]);
+  }, [reviews]);
 
   // Derived state for sorting
   const sortedReviews = useMemo(() => {

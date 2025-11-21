@@ -88,7 +88,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
       {/* VIEW: PROFILES (Quick Login) */}
       {view === 'profiles' && (
         <div className="w-full max-w-2xl animate-fade-in-up flex flex-col items-center">
-           <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-8">Who is watching?</h2>
+           <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-8">siapa yang review?</h2>
            
            <div className="flex flex-wrap justify-center gap-6 sm:gap-8 mb-10">
               {savedAccounts.map(account => (

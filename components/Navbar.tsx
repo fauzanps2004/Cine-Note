@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Film, Moon, Sun, Award, LogOut, Settings } from 'lucide-react';
+import { Film, Moon, Sun, Award, LogOut, Settings, Flame } from 'lucide-react';
 import { GamificationState, User as UserType } from '../types';
 import { RankModal } from './RankModal';
 
@@ -42,6 +42,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Right Side Actions */}
             <div className="flex items-center gap-4 sm:gap-6">
               
+              {/* CINE STREAK: 3D Sticker Style */}
+              <div 
+                 className="flex items-center gap-1.5 bg-gradient-to-b from-orange-400 to-red-500 text-white px-3 py-1.5 rounded-xl border-2 border-white dark:border-slate-700 shadow-[0_3px_0_rgb(194,65,12)] transform hover:-translate-y-0.5 transition-transform cursor-help relative group"
+                 title="Cine Streak: Watch films consecutively to increase!"
+              >
+                <Flame size={18} fill="currentColor" className="text-yellow-200 animate-pulse" />
+                <span className="font-black font-sans text-sm">{stats.streak}</span>
+                
+                {/* Tooltip */}
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 translate-y-full opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap pointer-events-none z-50 w-max">
+                   {stats.streak > 0 ? `${stats.streak} Day Streak!` : "Start a streak today!"}
+                </div>
+              </div>
+
               {/* Interactive Role Badge */}
               <button 
                 onClick={() => setShowRankModal(true)}
