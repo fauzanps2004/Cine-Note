@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Film, Moon, Sun, LogOut, Settings, Flame } from 'lucide-react';
+import { Film, Moon, Sun, LogOut, Settings, Camera } from 'lucide-react';
 import { GamificationState, User as UserType, UserRole } from '../types';
 import { RankModal } from './RankModal';
 import { RANK_STYLES } from '../constants';
@@ -49,12 +49,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Right Side Actions */}
             <div className="flex items-center gap-4 sm:gap-6">
               
-              {/* CINE STREAK: Cute 3D Sticker Style */}
+              {/* CINE STREAK: Cute 3D Sticker Style with Camera Icon */}
               <div 
                  className="flex items-center gap-1.5 bg-gradient-to-b from-orange-400 to-red-500 text-white px-3.5 py-1.5 rounded-2xl border-2 border-white dark:border-slate-700 transform hover:-translate-y-1 transition-all duration-200 cursor-help relative group"
                  style={{ boxShadow: '0 4px 0 rgb(194,65,12)' }}
               >
-                <Flame size={18} fill="currentColor" className="text-yellow-200 animate-pulse" />
+                <Camera size={18} fill="currentColor" className="text-yellow-200 animate-pulse" />
                 <span className="font-black font-sans text-sm">{stats.streak}</span>
                 
                 {/* Tooltip */}
