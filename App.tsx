@@ -4,6 +4,7 @@ import { StickyNote } from './components/StickyNote';
 import { AddReviewForm } from './components/AddReviewForm';
 import { AuthPage } from './components/AuthPage';
 import { ApiKeyModal } from './components/ApiKeyModal';
+import { MoodRecommender } from './components/MoodRecommender';
 import { Review, UserRole, MovieDetails, GamificationState, User } from './types';
 import { LEVEL_MILESTONES, COLOR_VARIANTS } from './constants';
 import { generateMotivationalQuote } from './services/geminiService';
@@ -97,7 +98,7 @@ function App() {
     let currentStreak = 0;
     if (reviews.length > 0) {
       // Get unique dates (formatted as local date string to ignore time)
-      const uniqueDates = Array.from(new Set(reviews.map(r => new Date(r.createdAt).toDateString())));
+      const uniqueDates: string[] = Array.from(new Set(reviews.map(r => new Date(r.createdAt).toDateString())));
       
       // Sort descending (newest first)
       uniqueDates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
@@ -307,6 +308,10 @@ function App() {
             </div>
           ))}
         </div>
+
+        {/* AI RECOMMENDATION SECTION */}
+        <MoodRecommender />
+
       </main>
 
       <AddReviewForm 

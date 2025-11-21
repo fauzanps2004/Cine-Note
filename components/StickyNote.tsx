@@ -22,11 +22,14 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
   const noteRef = useRef<HTMLDivElement>(null);
 
   const MAX_LENGTH = 150;
-  const shouldTruncate = review.content.length > MAX_LENGTH;
+  const hasContent = review.content && review.content.trim().length > 0;
+  const shouldTruncate = hasContent && review.content.length > MAX_LENGTH;
 
-  const displayContent = shouldTruncate && !isExpanded 
-    ? `${review.content.slice(0, MAX_LENGTH).trim()}...` 
-    : review.content;
+  const displayContent = hasContent 
+    ? (shouldTruncate && !isExpanded 
+        ? `${review.content.slice(0, MAX_LENGTH).trim()}...` 
+        : review.content)
+    : null;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -47,7 +50,9 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
     
     // Construct fallback text
     const stars = '★'.repeat(review.userRating) + '☆'.repeat(5 - review.userRating);
-    const shareText = `🎬 ${review.movieDetails.title} (${review.movieDetails.year})\n${stars}\n\n"${review.content}"\n\n— via CineNote`;
+    const shareText = hasContent 
+        ? `🎬 ${review.movieDetails.title} (${review.movieDetails.year})\n${stars}\n\n"${review.content}"\n\n— via CineNote`
+        : `🎬 ${review.movieDetails.title} (${review.movieDetails.year})\n${stars}\n\nWatched on CineNote`;
 
     try {
       // Try to capture image
@@ -186,12 +191,20 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
 
       {/* Body: Review Content */}
       <div className="flex-1 min-h-0 relative group-inner px-1 flex flex-col">
-         <Quote className="absolute top-0 right-0 text-black/5 dark:text-white/5 w-12 h-12 rotate-12 pointer-events-none" />
+         {hasContent && (
+            <Quote className="absolute top-0 right-0 text-black/5 dark:text-white/5 w-12 h-12 rotate-12 pointer-events-none" />
+         )}
         
-        <div className="flex-1 overflow-y-auto scrollbar-thin pr-2">
-          <p className="text-lg text-slate-800 dark:text-slate-100 leading-relaxed font-hand whitespace-pre-wrap">
-            {displayContent}
-          </p>
+        <div className={`flex-1 overflow-y-auto scrollbar-thin pr-2 ${!hasContent ? 'flex items-center justify-center' : ''}`}>
+          {hasContent ? (
+            <p className="text-lg text-slate-800 dark:text-slate-100 leading-relaxed font-hand whitespace-pre-wrap">
+              {displayContent}
+            </p>
+          ) : (
+             <div className="text-center opacity-40 select-none">
+                <span className="text-3xl font-hand -rotate-6 block text-slate-800 dark:text-slate-200">Watched</span>
+             </div>
+          )}
         </div>
 
         {shouldTruncate && (

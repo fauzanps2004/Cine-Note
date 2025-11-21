@@ -46,3 +46,13 @@ export const RANK_STYLES = {
     [UserRole.LEVEL_9]: { gradient: 'from-rose-400 to-rose-500', shadow: '#be123c', icon: Award },
     [UserRole.LEVEL_10]: { gradient: 'from-amber-300 to-yellow-500', shadow: '#b45309', icon: Crown },
 };
+
+export const MOODS = [
+  "Comforting", "Melancholic", "Intense", "Mind-Bending", 
+  "Chaotic", "Romantic", "Inspirational", "Terrifying"
+];
+
+export const VIBES = [
+  "Neon Noir", "90s Grunge", "Dreamlike", "Summer Nostalgia", 
+  "Dystopian", "Small Town Mystery", "Ghibli-esque", "Dark Academia"
+];

@@ -26,6 +26,14 @@ export interface Review {
   colorVariant: 'blue' | 'cyan' | 'sky' | 'indigo';
 }
 
+export interface MovieRecommendation {
+  title: string;
+  year: string;
+  reason: string;
+  posterUrl?: string | null;
+  imdbID?: string;
+}
+
 export enum UserRole {
   NOVICE = "Newbie",
   LEVEL_1 = "Casual Viewer",

@@ -19,6 +19,8 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
   
   const [rating, setRating] = useState(3);
   const [content, setContent] = useState('');
+  const [justWatched, setJustWatched] = useState(false);
+  
   const [error, setError] = useState('');
   const [imgError, setImgError] = useState<Record<string, boolean>>({});
   
@@ -64,6 +66,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
     setSelectedMovie(null);
     setRating(3);
     setContent('');
+    setJustWatched(false);
     setError('');
     setImgError({});
     setShowSuccess(false);
@@ -94,9 +97,10 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
   };
 
   const handleSubmitReview = () => {
-    if (selectedMovie && content.trim()) {
-      // Add review immediately
-      onAdd(selectedMovie, rating, content);
+    // Allow submission if content exists OR if "justWatched" is enabled
+    if (selectedMovie && (content.trim() || justWatched)) {
+      // Add review immediately (send empty string if justWatched)
+      onAdd(selectedMovie, rating, justWatched ? "" : content);
       
       // Show success state
       setShowSuccess(true);
@@ -301,19 +305,45 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-500 mb-2">Your Review</label>
-                    <textarea
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      placeholder="Masterpiece? Total garbage? The lighting was nice?"
-                      className="w-full h-32 p-3 bg-yellow-50 dark:bg-slate-900 border-l-4 border-l-yellow-400 border-t border-r border-b border-slate-200 dark:border-slate-700 rounded-r-lg focus:ring-0 focus:border-l-yellow-500 dark:text-slate-200 font-hand text-base resize-none"
-                      autoFocus
-                    />
+                    <div className="flex items-center justify-between mb-2">
+                       <label className="block text-sm font-medium text-slate-500">Your Review</label>
+                       
+                       {/* Just Watched Toggle */}
+                       <div 
+                         onClick={() => setJustWatched(!justWatched)}
+                         className="flex items-center gap-2 cursor-pointer select-none group"
+                       >
+                          <div className={`w-10 h-5 rounded-full p-0.5 transition-colors ${justWatched ? 'bg-brand-500' : 'bg-slate-200 dark:bg-slate-700'}`}>
+                             <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200 ${justWatched ? 'translate-x-5' : 'translate-x-0'}`} />
+                          </div>
+                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+                            Just watched (no review)
+                          </span>
+                       </div>
+                    </div>
+                    
+                    <div className="relative">
+                      <textarea
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        disabled={justWatched}
+                        placeholder="Masterpiece? Total garbage? The lighting was nice?"
+                        className={`w-full h-32 p-3 bg-yellow-50 dark:bg-slate-900 border-l-4 border-l-yellow-400 border-t border-r border-b border-slate-200 dark:border-slate-700 rounded-r-lg focus:ring-0 focus:border-l-yellow-500 dark:text-slate-200 font-hand text-base resize-none transition-opacity duration-200 ${justWatched ? 'opacity-30 cursor-not-allowed select-none' : 'opacity-100'}`}
+                        autoFocus={!justWatched}
+                      />
+                      {justWatched && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                           <span className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-slate-500 shadow-sm border border-slate-200 dark:border-slate-600">
+                             Logging as watched
+                           </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <button
                     onClick={handleSubmitReview}
-                    disabled={!content.trim()}
+                    disabled={!justWatched && !content.trim()}
                     className="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold shadow-lg shadow-brand-500/20 mt-2 disabled:opacity-50 disabled:shadow-none transition-all"
                   >
                     Save to Diary
