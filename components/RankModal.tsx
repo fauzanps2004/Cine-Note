@@ -1,6 +1,6 @@
 import React from 'react';
-import { X, Award, CheckCircle2, Circle, Lock } from 'lucide-react';
-import { LEVEL_MILESTONES } from '../constants';
+import { X, CheckCircle2, Lock } from 'lucide-react';
+import { LEVEL_MILESTONES, RANK_STYLES } from '../constants';
 import { GamificationState } from '../types';
 
 interface RankModalProps {
@@ -15,18 +15,13 @@ export const RankModal: React.FC<RankModalProps> = ({ isOpen, onClose, stats, re
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] border border-slate-200 dark:border-slate-700">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] border border-slate-200 dark:border-slate-700">
         
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-brand-50/50 dark:bg-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded-lg text-yellow-600 dark:text-yellow-400">
-                <Award size={24} />
-            </div>
-            <div>
-                <h2 className="text-xl font-bold text-slate-800 dark:text-white leading-none">Cinephile Ranks</h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Your journey to pretentiousness</p>
-            </div>
+          <div>
+              <h2 className="text-xl font-bold text-slate-800 dark:text-white leading-none">Cinephile Ranks</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Your journey to pretentiousness</p>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
             <X size={20} />
@@ -35,42 +30,44 @@ export const RankModal: React.FC<RankModalProps> = ({ isOpen, onClose, stats, re
 
         {/* Body */}
         <div className="p-6 overflow-y-auto">
-            <div className="space-y-6">
+            <div className="space-y-4">
                 {LEVEL_MILESTONES.map((milestone, idx) => {
                     const isUnlocked = reviewCount >= milestone.count;
                     const isCurrent = stats.role === milestone.role;
-                    const isNext = !isUnlocked && reviewCount < milestone.count && (idx === 0 || reviewCount >= LEVEL_MILESTONES[idx-1].count);
+                    const style = RANK_STYLES[milestone.role];
+                    const Icon = style.icon;
 
                     return (
                         <div 
                             key={milestone.role}
-                            className={`relative flex gap-4 p-4 rounded-xl border transition-all ${
+                            className={`relative flex items-center gap-4 p-3 rounded-2xl transition-all ${
                                 isCurrent 
-                                    ? 'bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800 ring-1 ring-brand-500' 
+                                    ? 'bg-slate-50 dark:bg-white/5 border-2 border-brand-500' 
                                     : isUnlocked 
-                                        ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 opacity-70'
-                                        : 'bg-transparent border-slate-100 dark:border-slate-800 opacity-50'
+                                        ? 'opacity-100'
+                                        : 'opacity-40 grayscale'
                             }`}
                         >
-                            <div className="shrink-0 mt-1">
-                                {isUnlocked ? (
-                                    <CheckCircle2 className="text-green-500" size={20} />
-                                ) : isNext ? (
-                                    <Circle className="text-brand-500 animate-pulse" size={20} />
-                                ) : (
-                                    <Lock className="text-slate-300 dark:text-slate-600" size={20} />
-                                )}
+                           {/* Sticker Icon */}
+                            <div 
+                                className={`shrink-0 w-14 h-14 rounded-xl flex items-center justify-center text-white bg-gradient-to-b ${style.gradient} border-2 border-white dark:border-slate-600`}
+                                style={{ boxShadow: `0 3px 0 ${style.shadow}` }}
+                            >
+                                <Icon size={24} strokeWidth={2.5} />
                             </div>
-                            <div>
-                                <div className="flex items-baseline justify-between mb-1">
-                                    <h3 className={`font-bold ${isCurrent ? 'text-brand-700 dark:text-brand-300' : 'text-slate-700 dark:text-slate-200'}`}>
+
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                    <h3 className={`font-bold truncate ${isCurrent ? 'text-brand-600 dark:text-brand-400' : 'text-slate-800 dark:text-slate-200'}`}>
                                         {milestone.role}
                                     </h3>
-                                    <span className="text-xs font-mono text-slate-400">
-                                        {milestone.count} Films
-                                    </span>
+                                    {isUnlocked && <CheckCircle2 size={16} className="text-green-500 shrink-0" />}
+                                    {!isUnlocked && <Lock size={14} className="text-slate-400 shrink-0" />}
                                 </div>
-                                <p className="text-sm text-slate-600 dark:text-slate-400 leading-snug">
+                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">
+                                    {milestone.count} Films
+                                </p>
+                                <p className="text-sm text-slate-600 dark:text-slate-300 leading-snug">
                                     {milestone.description}
                                 </p>
                             </div>
@@ -84,8 +81,8 @@ export const RankModal: React.FC<RankModalProps> = ({ isOpen, onClose, stats, re
         <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-700 text-center">
             <p className="text-xs text-slate-500">
                 {stats.nextMilestone - reviewCount > 0 
-                    ? `${stats.nextMilestone - reviewCount} more films to reach next rank`
-                    : "You have reached the peak. Go touch grass."}
+                    ? `${stats.nextMilestone - reviewCount} more films to unlock next sticker`
+                    : "You have collected every sticker. Go touch grass."}
             </p>
         </div>
       </div>

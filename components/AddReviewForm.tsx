@@ -1,14 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Plus, Loader2, Star, X, ImageOff, ArrowLeft, Film, CheckCircle } from 'lucide-react';
+import { Search, Loader2, Star, X, ImageOff, ArrowLeft, Film, CheckCircle } from 'lucide-react';
 import { searchMovies, getMovieDetails } from '../services/movieService';
 import { MovieDetails, MovieSearchResult } from '../types';
 
 interface AddReviewFormProps {
   onAdd: (movie: MovieDetails, rating: number, content: string) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd }) => {
-  const [isOpen, setIsOpen] = useState(false);
+export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onClose }) => {
   const [step, setStep] = useState<'search' | 'details' | 'review'>('search');
   const [query, setQuery] = useState('');
   
@@ -24,6 +25,13 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd }) => {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input when opened
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [isOpen]);
 
   // Debounce Search Logic
   useEffect(() => {
@@ -59,7 +67,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd }) => {
     setError('');
     setImgError({});
     setShowSuccess(false);
-    setIsOpen(false);
+    onClose();
   };
 
   const handleSelectMovie = async (movie: MovieSearchResult) => {
@@ -100,19 +108,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd }) => {
     }
   };
 
-  if (!isOpen) {
-    return (
-      <div className="fixed bottom-8 right-8 z-40">
-        <button
-          onClick={() => { setIsOpen(true); setTimeout(() => inputRef.current?.focus(), 100); }}
-          className="group flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-6 py-4 rounded-full shadow-xl shadow-brand-600/40 transition-all hover:-translate-y-1"
-        >
-          <Plus size={24} className="group-hover:rotate-90 transition-transform duration-300" />
-          <span className="font-bold">Log Film</span>
-        </button>
-      </div>
-    );
-  }
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">

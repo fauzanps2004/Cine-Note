@@ -27,11 +27,17 @@ export interface Review {
 }
 
 export enum UserRole {
-  NOVICE = "Ticket Buyer",
-  ENTHUSIAST = "Popcorn Addict",
-  BUFF = "Letterboxd Lurker",
-  CINEPHILE = "A24 Stan",
-  CRITIC = "Scorsese's Bestie"
+  NOVICE = "Newbie",
+  LEVEL_1 = "Casual Viewer",
+  LEVEL_2 = "Popcorn Addict",
+  LEVEL_3 = "Weekend Binger",
+  LEVEL_4 = "Letterboxd User",
+  LEVEL_5 = "A24 Disciple",
+  LEVEL_6 = "Criterion Collector",
+  LEVEL_7 = "Film Student",
+  LEVEL_8 = "Indie Snob",
+  LEVEL_9 = "Festival Juror",
+  LEVEL_10 = "Cinema God"
 }
 
 export interface GamificationState {

@@ -9,7 +9,7 @@ import { LEVEL_MILESTONES, COLOR_VARIANTS } from './constants';
 import { generateMotivationalQuote } from './services/geminiService';
 import { authService } from './services/authService';
 import { hasApiKey } from './services/movieService';
-import { Clapperboard, ArrowDownWideNarrow, ArrowUpNarrowWide } from 'lucide-react';
+import { Clapperboard, ArrowDownWideNarrow, ArrowUpNarrowWide, Plus } from 'lucide-react';
 
 // Simple ID generator
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -28,6 +28,7 @@ function App() {
   const [quote, setQuote] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [isAddReviewOpen, setIsAddReviewOpen] = useState(false);
 
   // Initialize Auth
   useEffect(() => {
@@ -227,14 +228,24 @@ function App() {
         
         {/* Welcome / Stats Header */}
         <div className="mb-10 text-center sm:text-left flex flex-col sm:flex-row items-end justify-between gap-4">
-          <div>
+          <div className="w-full sm:w-auto">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-800 dark:text-white tracking-tight mb-2">
               {user.username}'s <span className="text-brand-600 dark:text-brand-400">Diary</span>
             </h1>
             <p className="text-slate-500 dark:text-slate-400 max-w-md font-medium italic">
               {quote ? `"${quote}"` : "Loading wit..."}
             </p>
+
+            {/* Add Review Button (Moved to Top) */}
+            <button 
+              onClick={() => setIsAddReviewOpen(true)}
+              className="mt-6 inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-md shadow-brand-600/20 transition-all hover:-translate-y-0.5 active:scale-95"
+            >
+              <Plus size={20} />
+              <span>Add a review</span>
+            </button>
           </div>
+          
           <div className="text-right hidden sm:block">
             <span className="text-6xl font-black text-slate-200 dark:text-slate-800 leading-none select-none">
               {reviews.length.toString().padStart(2, '0')}
@@ -298,7 +309,11 @@ function App() {
         </div>
       </main>
 
-      <AddReviewForm onAdd={handleAddReview} />
+      <AddReviewForm 
+        onAdd={handleAddReview} 
+        isOpen={isAddReviewOpen}
+        onClose={() => setIsAddReviewOpen(false)}
+      />
       
       {showApiKeyModal && <ApiKeyModal onSave={() => setShowApiKeyModal(false)} />}
     </div>
