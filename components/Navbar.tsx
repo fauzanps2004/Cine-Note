@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Film, Moon, Sun, LogOut, Settings, Video } from 'lucide-react';
 import { GamificationState, User as UserType, UserRole } from '../types';
 import { RankModal } from './RankModal';
+import { QuoteTicker } from './QuoteTicker';
 import { RANK_STYLES } from '../constants';
 
 interface NavbarProps {
@@ -37,7 +38,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
             {/* Logo */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0">
               <div className="bg-brand-600 p-2.5 rounded-xl text-white shadow-lg shadow-brand-500/30 rotate-3 hover:rotate-0 transition-transform duration-300">
                 <Film size={26} strokeWidth={2.5} />
               </div>
@@ -46,8 +47,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </div>
 
+            {/* Center: Quote Ticker (Hidden on Mobile) */}
+            <QuoteTicker />
+
             {/* Right Side Actions */}
-            <div className="flex items-center gap-4 sm:gap-6">
+            <div className="flex items-center gap-4 sm:gap-6 shrink-0">
               
               {/* CINE STREAK: Cute 3D Sticker Style with Video Icon */}
               <div 

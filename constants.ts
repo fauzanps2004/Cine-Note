@@ -56,3 +56,21 @@ export const VIBES = [
   "Neon Noir", "90s Grunge", "Dreamlike", "Summer Nostalgia", 
   "Dystopian", "Small Town Mystery", "Ghibli-esque", "Dark Academia"
 ];
+
+export const MOVIE_QUOTES = [
+  { text: "Here's looking at you, kid.", movie: "Casablanca", year: "1942" },
+  { text: "May the Force be with you.", movie: "Star Wars", year: "1977" },
+  { text: "You're gonna need a bigger boat.", movie: "Jaws", year: "1975" },
+  { text: "I see dead people.", movie: "The Sixth Sense", year: "1999" },
+  { text: "Keep your friends close, but your enemies closer.", movie: "The Godfather Part II", year: "1974" },
+  { text: "Say 'hello' to my little friend!", movie: "Scarface", year: "1983" },
+  { text: "Why so serious?", movie: "The Dark Knight", year: "2008" },
+  { text: "The first rule of Fight Club is: You do not talk about Fight Club.", movie: "Fight Club", year: "1999" },
+  { text: "There's no place like home.", movie: "The Wizard of Oz", year: "1939" },
+  { text: "I'm the king of the world!", movie: "Titanic", year: "1997" },
+  { text: "Carpe diem. Seize the day, boys.", movie: "Dead Poets Society", year: "1989" },
+  { text: "Just keep swimming.", movie: "Finding Nemo", year: "2003" },
+  { text: "To infinity and beyond!", movie: "Toy Story", year: "1995" },
+  { text: "It's alive! It's alive!", movie: "Frankenstein", year: "1931" },
+  { text: "Houston, we have a problem.", movie: "Apollo 13", year: "1995" }
+];
