@@ -1,17 +1,22 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { X, CheckCircle2, Lock } from 'lucide-react';
-import { LEVEL_MILESTONES, RANK_STYLES } from '../constants';
-import { GamificationState } from '../types';
+import { GET_LEVEL_MILESTONES, RANK_STYLES, TRANSLATIONS } from '../constants';
+import { GamificationState, Language } from '../types';
 
 interface RankModalProps {
   isOpen: boolean;
   onClose: () => void;
   stats: GamificationState;
   reviewCount: number;
+  language: Language;
 }
 
-export const RankModal: React.FC<RankModalProps> = ({ isOpen, onClose, stats, reviewCount }) => {
+export const RankModal: React.FC<RankModalProps> = ({ isOpen, onClose, stats, reviewCount, language }) => {
   if (!isOpen) return null;
+
+  const t = TRANSLATIONS[language];
+  const MILESTONES = GET_LEVEL_MILESTONES(language);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
@@ -20,8 +25,8 @@ export const RankModal: React.FC<RankModalProps> = ({ isOpen, onClose, stats, re
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-brand-50/50 dark:bg-slate-800">
           <div>
-              <h2 className="text-xl font-bold text-slate-800 dark:text-white leading-none">Cinephile Ranks</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Your journey to pretentiousness</p>
+              <h2 className="text-xl font-bold text-slate-800 dark:text-white leading-none">{t.rank_modal_title}</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.rank_modal_subtitle}</p>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
             <X size={20} />
@@ -31,7 +36,7 @@ export const RankModal: React.FC<RankModalProps> = ({ isOpen, onClose, stats, re
         {/* Body */}
         <div className="p-6 overflow-y-auto">
             <div className="space-y-4">
-                {LEVEL_MILESTONES.map((milestone, idx) => {
+                {MILESTONES.map((milestone, idx) => {
                     const isUnlocked = reviewCount >= milestone.count;
                     const isCurrent = stats.role === milestone.role;
                     const style = RANK_STYLES[milestone.role];
@@ -65,7 +70,7 @@ export const RankModal: React.FC<RankModalProps> = ({ isOpen, onClose, stats, re
                                     {!isUnlocked && <Lock size={14} className="text-slate-400 shrink-0" />}
                                 </div>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">
-                                    {milestone.count} Films
+                                    {milestone.count} {t.films_count}
                                 </p>
                                 <p className="text-sm text-slate-600 dark:text-slate-300 leading-snug">
                                     {milestone.description}
@@ -81,8 +86,8 @@ export const RankModal: React.FC<RankModalProps> = ({ isOpen, onClose, stats, re
         <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-700 text-center">
             <p className="text-xs text-slate-500">
                 {stats.nextMilestone - reviewCount > 0 
-                    ? `${stats.nextMilestone - reviewCount} more films to unlock next sticker`
-                    : "You have collected every sticker. Go touch grass."}
+                    ? t.next_milestone(stats.nextMilestone - reviewCount)
+                    : t.all_unlocked}
             </p>
         </div>
       </div>

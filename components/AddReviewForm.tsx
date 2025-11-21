@@ -1,15 +1,18 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, Loader2, Star, X, ImageOff, ArrowLeft, Film, CheckCircle } from 'lucide-react';
 import { searchMovies, getMovieDetails } from '../services/movieService';
-import { MovieDetails, MovieSearchResult } from '../types';
+import { MovieDetails, MovieSearchResult, Language } from '../types';
+import { TRANSLATIONS } from '../constants';
 
 interface AddReviewFormProps {
   onAdd: (movie: MovieDetails, rating: number, content: string) => void;
   isOpen: boolean;
   onClose: () => void;
+  language: Language;
 }
 
-export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onClose }) => {
+export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onClose, language }) => {
   const [step, setStep] = useState<'search' | 'details' | 'review'>('search');
   const [query, setQuery] = useState('');
   
@@ -27,6 +30,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
   const [showSuccess, setShowSuccess] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const t = TRANSLATIONS[language];
 
   // Focus input when opened
   useEffect(() => {
@@ -47,7 +51,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
           setSearchResults(results || []);
         } catch (err) {
            console.error(err);
-           setError('Failed to search movies');
+           setError(t.error_search);
         } finally {
           setLoading(false);
         }
@@ -75,7 +79,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
 
   const handleSelectMovie = async (movie: MovieSearchResult) => {
     if (!movie.imdbID) {
-        setError('Cannot fetch details: Missing IMDb ID');
+        setError(t.error_imdb_id);
         return;
     }
 
@@ -87,10 +91,10 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
             setSelectedMovie(details);
             setStep('details');
         } else {
-            setError('Could not retrieve full details for this film.');
+            setError(t.error_fetch_details);
         }
     } catch (err) {
-        setError('Failed to fetch movie details.');
+        setError(t.error_fetch_details);
     } finally {
         setLoading(false);
     }
@@ -133,11 +137,11 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
               </button>
             )}
             <h2 className="text-lg font-bold text-slate-800 dark:text-white">
-              {showSuccess ? 'Saved' : (
+              {showSuccess ? t.saved_title : (
                 <>
-                  {step === 'search' && 'What did you watch?'}
-                  {step === 'details' && 'Is this it?'}
-                  {step === 'review' && 'Your verdict'}
+                  {step === 'search' && t.header_search}
+                  {step === 'details' && t.header_details}
+                  {step === 'review' && t.header_review}
                 </>
               )}
             </h2>
@@ -156,7 +160,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
                   <CheckCircle size={48} strokeWidth={3} />
                 </div>
                 <h2 className="text-2xl font-bold text-slate-800 dark:text-white font-hand">
-                  Logged!
+                  {t.saved_msg}
                 </h2>
              </div>
           ) : (
@@ -172,7 +176,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
                       type="text"
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Search IMDb..."
+                      placeholder={t.search_placeholder}
                       className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none dark:text-white transition-all"
                       autoFocus
                     />
@@ -190,7 +194,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
                     {!loading && searchResults.length === 0 && query.trim() && (
                         <div className="text-center text-slate-400 py-8 flex flex-col items-center">
                            <Film className="mb-2 opacity-50" size={32} />
-                           <p className="text-sm">Searching for "{query}"...</p>
+                           <p className="text-sm">{t.searching} "{query}"...</p>
                         </div>
                     )}
                     
@@ -281,7 +285,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
                     onClick={() => setStep('review')}
                     className="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-lg transition-colors font-medium shadow-lg shadow-brand-500/20"
                   >
-                    This is the one
+                    {t.confirm_btn}
                   </button>
                 </div>
               )}
@@ -290,7 +294,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
               {step === 'review' && (
                 <div className="space-y-4 animate-fade-in">
                   <div className="flex flex-col items-center mb-4">
-                    <label className="text-sm font-medium text-slate-500 mb-2">Rating</label>
+                    <label className="text-sm font-medium text-slate-500 mb-2">{t.rating_label}</label>
                     <div className="flex gap-2">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
@@ -306,7 +310,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
 
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                       <label className="block text-sm font-medium text-slate-500">Your Review</label>
+                       <label className="block text-sm font-medium text-slate-500">{t.review_label}</label>
                        
                        {/* Just Watched Toggle */}
                        <div 
@@ -317,7 +321,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
                              <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200 ${justWatched ? 'translate-x-5' : 'translate-x-0'}`} />
                           </div>
                           <span className="text-xs font-bold text-slate-500 dark:text-slate-400 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
-                            Just watched (no review)
+                            {t.just_watched_toggle}
                           </span>
                        </div>
                     </div>
@@ -327,14 +331,14 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         disabled={justWatched}
-                        placeholder="Masterpiece? Total garbage? The lighting was nice?"
+                        placeholder={t.review_placeholder}
                         className={`w-full h-32 p-3 bg-yellow-50 dark:bg-slate-900 border-l-4 border-l-yellow-400 border-t border-r border-b border-slate-200 dark:border-slate-700 rounded-r-lg focus:ring-0 focus:border-l-yellow-500 dark:text-slate-200 font-hand text-base resize-none transition-opacity duration-200 ${justWatched ? 'opacity-30 cursor-not-allowed select-none' : 'opacity-100'}`}
                         autoFocus={!justWatched}
                       />
                       {justWatched && (
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                            <span className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-slate-500 shadow-sm border border-slate-200 dark:border-slate-600">
-                             Logging as watched
+                             {t.just_watched_overlay}
                            </span>
                         </div>
                       )}
@@ -346,7 +350,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
                     disabled={!justWatched && !content.trim()}
                     className="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold shadow-lg shadow-brand-500/20 mt-2 disabled:opacity-50 disabled:shadow-none transition-all"
                   >
-                    Save to Diary
+                    {t.save_btn}
                   </button>
                 </div>
               )}

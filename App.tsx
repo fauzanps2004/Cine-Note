@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from './components/Navbar';
 import { StickyNote } from './components/StickyNote';
@@ -5,8 +6,8 @@ import { AddReviewForm } from './components/AddReviewForm';
 import { AuthPage } from './components/AuthPage';
 import { ApiKeyModal } from './components/ApiKeyModal';
 import { MoodRecommender } from './components/MoodRecommender';
-import { Review, UserRole, MovieDetails, GamificationState, User } from './types';
-import { LEVEL_MILESTONES, COLOR_VARIANTS } from './constants';
+import { Review, UserRole, MovieDetails, GamificationState, User, Language } from './types';
+import { GET_LEVEL_MILESTONES, COLOR_VARIANTS, TRANSLATIONS } from './constants';
 import { generateMotivationalQuote } from './services/geminiService';
 import { authService } from './services/authService';
 import { hasApiKey } from './services/movieService';
@@ -26,10 +27,19 @@ function App() {
     const saved = localStorage.getItem('cinenote_theme');
     return saved === 'dark';
   });
+  
+  // LANGUAGE STATE
+  const [language, setLanguage] = useState<Language>(() => {
+    const saved = localStorage.getItem('cinenote_language');
+    return (saved === 'id' || saved === 'en') ? saved : 'id';
+  });
+
   const [quote, setQuote] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [isAddReviewOpen, setIsAddReviewOpen] = useState(false);
+
+  const t = TRANSLATIONS[language];
 
   // Initialize Auth
   useEffect(() => {
@@ -75,6 +85,15 @@ function App() {
     }
   }, [isDark]);
 
+  // Language Logic
+  useEffect(() => {
+    localStorage.setItem('cinenote_language', language);
+  }, [language]);
+
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'id' ? 'en' : 'id');
+  };
+
   // Gamification Logic (Rank & Streak)
   const stats: GamificationState = useMemo(() => {
     // 1. Calculate Rank
@@ -82,14 +101,17 @@ function App() {
     let currentRole = UserRole.NOVICE;
     let nextCount = 3;
 
-    for (let i = 0; i < LEVEL_MILESTONES.length; i++) {
-      if (count >= LEVEL_MILESTONES[i].count) {
-        currentRole = LEVEL_MILESTONES[i].role;
-        nextCount = LEVEL_MILESTONES[i + 1]?.count || count * 2;
+    // Get milestones for current language (roles are same enum, descriptions differ, but counts are logic)
+    const MILESTONES = GET_LEVEL_MILESTONES(language);
+
+    for (let i = 0; i < MILESTONES.length; i++) {
+      if (count >= MILESTONES[i].count) {
+        currentRole = MILESTONES[i].role;
+        nextCount = MILESTONES[i + 1]?.count || count * 2;
       }
     }
 
-    const prevMilestone = LEVEL_MILESTONES.find(m => m.role === currentRole)?.count || 0;
+    const prevMilestone = MILESTONES.find(m => m.role === currentRole)?.count || 0;
     const totalNeeded = nextCount - prevMilestone;
     const currentProgress = count - prevMilestone;
     const progressPercentage = Math.min(100, Math.max(0, (currentProgress / totalNeeded) * 100));
@@ -133,7 +155,7 @@ function App() {
       progress: progressPercentage,
       streak: currentStreak
     };
-  }, [reviews]);
+  }, [reviews, language]);
 
   // Derived state for sorting
   const sortedReviews = useMemo(() => {
@@ -147,9 +169,9 @@ function App() {
   // Fetch Quote
   useEffect(() => {
     if (user) {
-      generateMotivationalQuote(stats.role).then(setQuote);
+      generateMotivationalQuote(stats.role, language).then(setQuote);
     }
-  }, [stats.role, user]);
+  }, [stats.role, user, language]);
 
   // Actions
   const handleLogin = (loggedInUser: User) => {
@@ -200,7 +222,7 @@ function App() {
     return (
       <div className={isDark ? 'dark' : ''}>
         <div className="min-h-screen bg-brand-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-300">
-           <AuthPage onAuthSuccess={handleLogin} />
+           <AuthPage onAuthSuccess={handleLogin} language={language} toggleLanguage={toggleLanguage} />
            <button 
               onClick={() => setIsDark(!isDark)} 
               className="fixed bottom-4 right-4 p-2 rounded-full bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 shadow-lg"
@@ -223,6 +245,8 @@ function App() {
         onLogout={handleLogout}
         reviewCount={reviews.length}
         onOpenSettings={() => setShowApiKeyModal(true)}
+        language={language}
+        toggleLanguage={toggleLanguage}
       />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-8">
@@ -231,10 +255,10 @@ function App() {
         <div className="mb-10 text-center sm:text-left flex flex-col sm:flex-row items-end justify-between gap-4">
           <div className="w-full sm:w-auto">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-800 dark:text-white tracking-tight mb-2">
-              {user.username}'s <span className="text-brand-600 dark:text-brand-400">Diary</span>
+              {t.diary_of} <span className="text-brand-600 dark:text-brand-400">{user.username}</span>
             </h1>
             <p className="text-slate-500 dark:text-slate-400 max-w-md font-medium italic">
-              {quote ? `"${quote}"` : "Loading wit..."}
+              {quote ? `"${quote}"` : t.loading_quote}
             </p>
 
             {/* Add Review Button (Moved to Top) */}
@@ -243,7 +267,7 @@ function App() {
               className="mt-6 inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-md shadow-brand-600/20 transition-all hover:-translate-y-0.5 active:scale-95"
             >
               <Plus size={20} />
-              <span>Add a review</span>
+              <span>{t.add_review_btn}</span>
             </button>
           </div>
           
@@ -252,7 +276,7 @@ function App() {
               {reviews.length.toString().padStart(2, '0')}
             </span>
             <span className="block text-xs font-bold text-slate-400 uppercase tracking-widest mr-1">
-              Films Logged
+              {t.films_logged}
             </span>
           </div>
         </div>
@@ -266,12 +290,12 @@ function App() {
             >
               {sortOrder === 'desc' ? (
                 <>
-                  <span>Newest First</span>
+                  <span>{t.sort_newest}</span>
                   <ArrowDownWideNarrow size={16} />
                 </>
               ) : (
                 <>
-                  <span>Oldest First</span>
+                  <span>{t.sort_oldest}</span>
                   <ArrowUpNarrowWide size={16} />
                 </>
               )}
@@ -285,9 +309,9 @@ function App() {
             <div className="bg-brand-100 dark:bg-brand-900/30 p-4 rounded-full mb-4">
               <Clapperboard className="text-brand-500" size={32} />
             </div>
-            <h3 className="text-xl font-bold text-slate-700 dark:text-slate-200">No films logged.</h3>
+            <h3 className="text-xl font-bold text-slate-700 dark:text-slate-200">{t.empty_title}</h3>
             <p className="text-slate-500 dark:text-slate-400 mt-2 text-center max-w-xs">
-              Did you really spend your weekend touching grass?
+              {t.empty_subtitle}
             </p>
           </div>
         )}
@@ -304,13 +328,14 @@ function App() {
                 review={review} 
                 index={index} 
                 onDelete={handleDeleteReview} 
+                language={language}
               />
             </div>
           ))}
         </div>
 
         {/* AI RECOMMENDATION SECTION */}
-        <MoodRecommender />
+        <MoodRecommender language={language} />
 
       </main>
 
@@ -318,9 +343,10 @@ function App() {
         onAdd={handleAddReview} 
         isOpen={isAddReviewOpen}
         onClose={() => setIsAddReviewOpen(false)}
+        language={language}
       />
       
-      {showApiKeyModal && <ApiKeyModal onSave={() => setShowApiKeyModal(false)} />}
+      {showApiKeyModal && <ApiKeyModal onSave={() => setShowApiKeyModal(false)} language={language} />}
     </div>
   );
 }

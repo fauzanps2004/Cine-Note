@@ -1,27 +1,38 @@
+
 import { GoogleGenAI } from "@google/genai";
-import { MovieRecommendation } from "../types";
+import { MovieRecommendation, Language } from "../types";
 
 // Initialize Gemini Client
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-export const generateMotivationalQuote = async (role: string): Promise<string> => {
+export const generateMotivationalQuote = async (role: string, lang: Language): Promise<string> => {
   try {
+     const prompt = lang === 'id' 
+      ? `Generate a short, witty, Letterboxd-style one-liner about watching movies for a user with the rank "${role}". It can be slightly sarcastic, dry, or appreciative. Max 15 words. Output strictly in Indonesian language (Bahasa Indonesia gaul/santai). Do not use quotes.`
+      : `Generate a short, witty, Letterboxd-style one-liner about watching movies for a user with the rank "${role}". It can be slightly sarcastic, dry, or appreciative. Max 15 words. Output strictly in English. Do not use quotes.`;
+
      const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: `Generate a short, witty, Letterboxd-style one-liner about watching movies for a user with the rank "${role}". It can be slightly sarcastic, dry, or appreciative. Max 15 words. Do not use quotes.`,
+      contents: prompt,
     });
-    return response.text || "Cinema is truth at 24 frames per second.";
+    return response.text || (lang === 'id' ? "Sinema adalah kebenaran 24 frame per detik." : "Cinema is truth at 24 frames per second.");
   } catch (e) {
-    return "Go watch something.";
+    return lang === 'id' ? "Sana nonton film." : "Go watch a movie.";
   }
 }
 
-export const getMovieRecommendations = async (mood: string, vibe: string): Promise<MovieRecommendation[]> => {
+export const getMovieRecommendations = async (mood: string, vibe: string, lang: Language): Promise<MovieRecommendation[]> => {
   try {
-    const prompt = `
+    const prompt = lang === 'id' 
+      ? `
       Suggest 3 distinct movies for someone who is feeling "${mood}" and wants a "${vibe}" atmosphere.
       Return strictly a JSON array. No markdown formatting, no code blocks.
-      Format: [{"title": "Movie Title", "year": "YYYY", "plot": "Brief plot summary (max 20 words).", "reason": "A personal, casual, and relaxed explanation of why they strictly need to watch this right now based on their mood. Talk to them like a close friend recommending a movie. Don't be formal."}]
+      Format: [{"title": "Movie Title", "year": "YYYY", "plot": "Ringkasan plot singkat (maks 20 kata) dalam Bahasa Indonesia.", "reason": "Penjelasan personal, santai, dan gaul (seperti teman ngobrol) dalam Bahasa Indonesia kenapa mereka wajib nonton film ini sekarang sesuai mood mereka."}]
+    `
+      : `
+      Suggest 3 distinct movies for someone who is feeling "${mood}" and wants a "${vibe}" atmosphere.
+      Return strictly a JSON array. No markdown formatting, no code blocks.
+      Format: [{"title": "Movie Title", "year": "YYYY", "plot": "Short plot summary (max 20 words) in English.", "reason": "Personal, casual, and friendly explanation in English why they must watch this movie right now based on their mood."}]
     `;
 
     const response = await ai.models.generateContent({

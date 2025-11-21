@@ -1,16 +1,18 @@
+
 import React, { useState, useRef } from 'react';
 import { Trash2, Star, Quote, ImageOff, Share2, Check, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
-import { Review } from '../types';
-import { STICKY_COLORS, STICKY_ROTATIONS } from '../constants';
+import { Review, Language } from '../types';
+import { STICKY_COLORS, STICKY_ROTATIONS, TRANSLATIONS } from '../constants';
 import html2canvas from 'html2canvas';
 
 interface StickyNoteProps {
   review: Review;
   onDelete: (id: string) => void;
   index: number;
+  language: Language;
 }
 
-export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index }) => {
+export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index, language }) => {
   const rotation = STICKY_ROTATIONS[index % STICKY_ROTATIONS.length];
   const colorClasses = STICKY_COLORS[review.colorVariant];
   const [imgError, setImgError] = useState(false);
@@ -20,6 +22,7 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
   const [isExpanded, setIsExpanded] = useState(false);
   
   const noteRef = useRef<HTMLDivElement>(null);
+  const t = TRANSLATIONS[language];
 
   const MAX_LENGTH = 150;
   const hasContent = review.content && review.content.trim().length > 0;
@@ -51,8 +54,8 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
     // Construct fallback text
     const stars = '★'.repeat(review.userRating) + '☆'.repeat(5 - review.userRating);
     const shareText = hasContent 
-        ? `🎬 ${review.movieDetails.title} (${review.movieDetails.year})\n${stars}\n\n"${review.content}"\n\n— via CineNote`
-        : `🎬 ${review.movieDetails.title} (${review.movieDetails.year})\n${stars}\n\nWatched on CineNote`;
+        ? `🎬 ${review.movieDetails.title} (${review.movieDetails.year})\n${stars}\n\n"${review.content}"\n\n— ${t.share_via}`
+        : `🎬 ${review.movieDetails.title} (${review.movieDetails.year})\n${stars}\n\n${t.just_watched_watermark}`;
 
     try {
       // Try to capture image
@@ -202,7 +205,7 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
             </p>
           ) : (
              <div className="text-center opacity-40 select-none">
-                <span className="text-3xl font-hand -rotate-6 block text-slate-800 dark:text-slate-200">Watched</span>
+                <span className="text-3xl font-hand -rotate-6 block text-slate-800 dark:text-slate-200">{t.just_watched_watermark}</span>
              </div>
           )}
         </div>
@@ -214,9 +217,9 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
             data-html2canvas-ignore // Ignore read more button in screenshot
           >
             {isExpanded ? (
-              <>Show Less <ChevronUp size={12} /></>
+              <>{t.close} <ChevronUp size={12} /></>
             ) : (
-              <>Read More <ChevronDown size={12} /></>
+              <>{t.read_more} <ChevronDown size={12} /></>
             )}
           </button>
         )}
@@ -231,7 +234,7 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
            <div className="absolute top-0 left-0 right-0 h-[1px] bg-black/5"></div>
            
            <span className="text-[8px] font-black text-slate-500/60 dark:text-slate-400/60 uppercase tracking-[0.2em] mb-0.5">
-             WATCHED
+             {t.watched_label}
            </span>
            <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-200 tracking-tighter">
              {new Date(review.createdAt).toLocaleDateString(undefined, { year: '2-digit', month: 'short', day: 'numeric' }).toUpperCase()}
@@ -248,7 +251,7 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
           <button 
             onClick={handleShare}
             className={`p-1.5 rounded-full transition-all duration-200 ${justShared ? 'bg-green-100 text-green-600' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/30'}`}
-            title="Share image"
+            title={t.share_tooltip}
             disabled={isSharing}
           >
             {isSharing ? (
@@ -263,7 +266,7 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
           <button 
             onClick={handleDelete}
             className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full transition-all duration-200 hover:scale-110 active:scale-95"
-            title="Delete this entry"
+            title={t.delete_tooltip}
           >
             <Trash2 size={16} />
           </button>

@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
-import { Film, Moon, Sun, LogOut, Settings, Video } from 'lucide-react';
-import { GamificationState, User as UserType, UserRole } from '../types';
+import { Film, Moon, Sun, LogOut, Settings, Video, Languages } from 'lucide-react';
+import { GamificationState, User as UserType, UserRole, Language } from '../types';
 import { RankModal } from './RankModal';
 import { QuoteTicker } from './QuoteTicker';
-import { RANK_STYLES } from '../constants';
+import { RANK_STYLES, TRANSLATIONS } from '../constants';
 
 interface NavbarProps {
   isDark: boolean;
@@ -13,6 +14,8 @@ interface NavbarProps {
   onLogout: () => void;
   reviewCount?: number;
   onOpenSettings: () => void;
+  language: Language;
+  toggleLanguage: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ 
@@ -22,9 +25,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   user, 
   onLogout, 
   reviewCount = 0,
-  onOpenSettings
+  onOpenSettings,
+  language,
+  toggleLanguage
 }) => {
   const [showRankModal, setShowRankModal] = useState(false);
+  const t = TRANSLATIONS[language];
   
   const RankIcon = RANK_STYLES[stats.role]?.icon || Film;
   const rankStyle = RANK_STYLES[stats.role] || RANK_STYLES[UserRole.NOVICE];
@@ -63,7 +69,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 
                 {/* Tooltip */}
                 <div className={tooltipClasses}>
-                   {stats.streak > 0 ? `${stats.streak} Day Streak!` : "Start a streak today!"}
+                   {t.streak_tooltip(stats.streak)}
                 </div>
               </div>
 
@@ -81,13 +87,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <RankIcon size={18} strokeWidth={2.5} />
                 </div>
                 <div className="flex flex-col items-start leading-none">
-                  <span className="text-[10px] font-bold text-white/80 uppercase tracking-wider mb-0.5">Rank</span>
+                  <span className="text-[10px] font-bold text-white/80 uppercase tracking-wider mb-0.5">{t.rank_title}</span>
                   <span className="text-xs font-black tracking-wide">{stats.role}</span>
                 </div>
                 
                 {/* Progress hint Tooltip */}
                 <div className={tooltipClasses}>
-                   View Rank Progress
+                   {t.rank_tooltip}
                 </div>
               </button>
 
@@ -96,9 +102,23 @@ export const Navbar: React.FC<NavbarProps> = ({
               {/* User & Theme */}
               <div className="flex items-center gap-3">
                  <div className="hidden md:flex flex-col items-end">
-                    <span className="text-xs text-slate-500 dark:text-slate-400">Director</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">Sutradara</span>
                     <span className="text-sm font-bold text-slate-800 dark:text-white leading-none">{user.username}</span>
                  </div>
+
+                {/* Language Toggle */}
+                <button
+                   onClick={toggleLanguage}
+                   className="relative group p-2.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors"
+                >
+                  <Languages size={20} />
+                  <div className="absolute -bottom-1 -right-1 text-[8px] font-bold bg-brand-100 text-brand-700 px-1 rounded">
+                    {language.toUpperCase()}
+                  </div>
+                  <div className={tooltipClasses}>
+                    {language === 'id' ? 'English' : 'Bahasa Indonesia'}
+                  </div>
+                </button>
 
                 {/* Theme Toggle */}
                 <button
@@ -108,7 +128,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 >
                   {isDark ? <Sun size={20} /> : <Moon size={20} />}
                   <div className={tooltipClasses}>
-                    {isDark ? 'Light Mode' : 'Dark Mode'}
+                    {isDark ? t.theme_light : t.theme_dark}
                   </div>
                 </button>
                 
@@ -119,7 +139,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 >
                   <Settings size={20} />
                   <div className={tooltipClasses}>
-                    API Settings
+                    {t.settings_tooltip}
                   </div>
                 </button>
 
@@ -130,7 +150,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 >
                   <LogOut size={20} />
                   <div className={tooltipClasses}>
-                    Log Out
+                    {t.logout_tooltip}
                   </div>
                 </button>
               </div>
@@ -144,6 +164,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         onClose={() => setShowRankModal(false)} 
         stats={stats} 
         reviewCount={reviewCount}
+        language={language}
       />
     </>
   );

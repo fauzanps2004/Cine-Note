@@ -1,19 +1,25 @@
+
 import React, { useState, useEffect } from 'react';
-import { Film, Loader2, Lock, User as UserIcon, Plus, X, Trash2 } from 'lucide-react';
+import { Film, Loader2, Lock, User as UserIcon, Plus, X, Languages } from 'lucide-react';
 import { authService } from '../services/authService';
-import { User } from '../types';
+import { User, Language } from '../types';
+import { TRANSLATIONS } from '../constants';
 
 interface AuthPageProps {
   onAuthSuccess: (user: User) => void;
+  language: Language;
+  toggleLanguage: () => void;
 }
 
-export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
+export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess, language, toggleLanguage }) => {
   const [savedAccounts, setSavedAccounts] = useState<User[]>([]);
   const [view, setView] = useState<'profiles' | 'login'>('login'); // 'profiles' or 'login'
   const [isLoginMode, setIsLoginMode] = useState(true); // For the form: Login vs Signup
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+
+  const t = TRANSLATIONS[language];
 
   const [formData, setFormData] = useState({
     username: '',
@@ -36,7 +42,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
       await authService.quickLogin(user);
       onAuthSuccess(user);
     } catch (e) {
-      setError("Could not login to profile.");
+      setError(t.login_failed);
       setLoading(false);
     }
   };
@@ -51,7 +57,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
     e.preventDefault();
     setError('');
     if (!formData.username || !formData.password) {
-      setError('Required');
+      setError(t.required);
       return;
     }
 
@@ -75,6 +81,15 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 transition-colors duration-300 bg-brand-50 dark:bg-slate-900">
       
+      {/* Language Toggle (Top Right) */}
+      <button 
+        onClick={toggleLanguage}
+        className="absolute top-6 right-6 p-2 rounded-full bg-white/50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm flex items-center gap-2 px-3"
+      >
+        <Languages size={16} />
+        <span className="text-xs font-bold">{language.toUpperCase()}</span>
+      </button>
+
       {/* Minimalist Brand */}
       <div className="flex items-center gap-3 mb-10 animate-fade-in">
         <div className="bg-brand-600 p-2.5 rounded-xl text-white shadow-lg shadow-brand-500/30 rotate-3">
@@ -88,7 +103,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
       {/* VIEW: PROFILES (Quick Login) */}
       {view === 'profiles' && (
         <div className="w-full max-w-2xl animate-fade-in-up flex flex-col items-center">
-           <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-8">siapa yang review?</h2>
+           <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-8">{t.who_reviewing}</h2>
            
            <div className="flex flex-wrap justify-center gap-6 sm:gap-8 mb-10">
               {savedAccounts.map(account => (
@@ -128,7 +143,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
                  >
                     <Plus size={32} />
                  </button>
-                 <span className="mt-3 text-sm font-medium text-slate-400">Add Account</span>
+                 <span className="mt-3 text-sm font-medium text-slate-400">{t.add_account}</span>
               </div>
            </div>
 
@@ -136,7 +151,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
              onClick={() => setIsEditing(!isEditing)}
              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${isEditing ? 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
            >
-             {isEditing ? 'Done' : 'Manage Profiles'}
+             {isEditing ? t.done : t.manage_profiles}
            </button>
         </div>
       )}
@@ -157,7 +172,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
                  </button>
                )}
                <h2 className="text-xl font-bold text-slate-800 dark:text-white">
-                 {isLoginMode ? 'Sign In' : 'Join CineNote'}
+                 {isLoginMode ? t.login : t.join_cinenote}
                </h2>
             </div>
 
@@ -171,7 +186,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
                     value={formData.username}
                     onChange={(e) => setFormData({...formData, username: e.target.value})}
                     className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-900 border-transparent focus:bg-white dark:focus:bg-black/20 rounded-2xl focus:ring-2 focus:ring-brand-500/50 outline-none transition-all dark:text-white placeholder:text-slate-400 font-medium text-sm"
-                    placeholder="Username"
+                    placeholder={t.username}
                     autoComplete="username"
                   />
                 </div>
@@ -186,7 +201,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
                     value={formData.password}
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
                     className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-900 border-transparent focus:bg-white dark:focus:bg-black/20 rounded-2xl focus:ring-2 focus:ring-brand-500/50 outline-none transition-all dark:text-white placeholder:text-slate-400 font-medium text-sm"
-                    placeholder="Password"
+                    placeholder={t.password}
                     autoComplete={isLoginMode ? "current-password" : "new-password"}
                   />
                 </div>
@@ -206,7 +221,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
                 {loading ? (
                   <Loader2 className="animate-spin" size={20} />
                 ) : (
-                  <span>{isLoginMode ? 'Enter' : 'Create Account'}</span>
+                  <span>{isLoginMode ? t.login : t.create_account}</span>
                 )}
               </button>
             </form>
@@ -216,7 +231,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
                   onClick={() => { setError(''); setIsLoginMode(!isLoginMode); }}
                   className="text-sm text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors"
                 >
-                  {isLoginMode ? "Create an account" : "Back to login"}
+                  {isLoginMode ? t.no_account : t.back_login}
                 </button>
             </div>
           </div>

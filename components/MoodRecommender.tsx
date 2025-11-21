@@ -1,15 +1,24 @@
+
 import React, { useState } from 'react';
 import { Sparkles, Loader2, Film, X } from 'lucide-react';
-import { MOODS, VIBES } from '../constants';
+import { GET_MOODS, GET_VIBES, TRANSLATIONS } from '../constants';
 import { getMovieRecommendations } from '../services/geminiService';
 import { searchMovies } from '../services/movieService';
-import { MovieRecommendation } from '../types';
+import { MovieRecommendation, Language } from '../types';
 
-export const MoodRecommender: React.FC = () => {
+interface MoodRecommenderProps {
+  language: Language;
+}
+
+export const MoodRecommender: React.FC<MoodRecommenderProps> = ({ language }) => {
   const [moodInput, setMoodInput] = useState<string>('');
   const [vibeInput, setVibeInput] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<MovieRecommendation[]>([]);
+
+  const t = TRANSLATIONS[language];
+  const MOODS = GET_MOODS(language);
+  const VIBES = GET_VIBES(language);
 
   const handleGenerate = async () => {
     if (!moodInput.trim() || !vibeInput.trim()) return;
@@ -19,7 +28,7 @@ export const MoodRecommender: React.FC = () => {
 
     try {
       // 1. Get suggestions from Gemini
-      const aiSuggestions = await getMovieRecommendations(moodInput, vibeInput);
+      const aiSuggestions = await getMovieRecommendations(moodInput, vibeInput, language);
 
       // 2. Enrich with real posters from OMDb
       const enrichedResults = await Promise.all(
@@ -64,10 +73,10 @@ export const MoodRecommender: React.FC = () => {
           <div className="relative z-10">
             <h2 className="text-2xl font-bold flex items-center gap-2 font-hand tracking-wide">
               <Sparkles className="text-yellow-300" />
-              What's the Vibe?
+              {t.mood_title}
             </h2>
             <p className="text-brand-100 text-sm mt-1 opacity-90">
-              Describe your headspace, get a curated watchlist.
+              {t.mood_subtitle}
             </p>
           </div>
           {/* Decorative BG */}
@@ -82,13 +91,13 @@ export const MoodRecommender: React.FC = () => {
             {/* Mood Input */}
             <div className="flex-1 flex flex-col">
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                I'm feeling...
+                {t.mood_label}
               </label>
               <input 
                 type="text"
                 value={moodInput}
                 onChange={(e) => setMoodInput(e.target.value)}
-                placeholder="e.g. Nostalgic, chaotic, lazy..."
+                placeholder={t.mood_placeholder}
                 className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none dark:text-white transition-all mb-3"
               />
               
@@ -109,13 +118,13 @@ export const MoodRecommender: React.FC = () => {
             {/* Vibe Input */}
             <div className="flex-1 flex flex-col">
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                I want a...
+                {t.vibe_label}
               </label>
                <input 
                 type="text"
                 value={vibeInput}
                 onChange={(e) => setVibeInput(e.target.value)}
-                placeholder="e.g. 80s sci-fi, slow burn, rainy day..."
+                placeholder={t.vibe_placeholder}
                 className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none dark:text-white transition-all mb-3"
               />
               
@@ -141,7 +150,7 @@ export const MoodRecommender: React.FC = () => {
                   onClick={handleClear}
                   className="px-4 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                 >
-                   Clear
+                   {t.clear_btn}
                 </button>
              )}
             <button
@@ -150,7 +159,7 @@ export const MoodRecommender: React.FC = () => {
               className="group relative px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold shadow-lg shadow-slate-500/20 disabled:opacity-50 disabled:shadow-none transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
             >
               {loading ? <Loader2 className="animate-spin" /> : <Sparkles size={18} />}
-              <span>Curate for Me</span>
+              <span>{t.generate_btn}</span>
             </button>
           </div>
 
@@ -184,7 +193,7 @@ export const MoodRecommender: React.FC = () => {
                     {/* Vibe Check / Reason */}
                     <div className="mt-auto pt-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 p-2 rounded-lg">
                       <span className="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider block mb-1">
-                          Vibe Check
+                          {t.vibe_check_label}
                       </span>
                       <p className="text-sm text-slate-800 dark:text-slate-200 font-hand leading-snug italic">
                         "{movie.reason}"
