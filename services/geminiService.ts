@@ -21,7 +21,7 @@ export const getMovieRecommendations = async (mood: string, vibe: string): Promi
     const prompt = `
       Suggest 3 distinct movies for someone who is feeling "${mood}" and wants a "${vibe}" atmosphere.
       Return strictly a JSON array. No markdown formatting, no code blocks.
-      Format: [{"title": "Movie Title", "year": "YYYY", "plot": "Brief plot summary (max 20 words).", "reason": "Witty explanation of why it fits the requested mood/vibe."}]
+      Format: [{"title": "Movie Title", "year": "YYYY", "plot": "Brief plot summary (max 20 words).", "reason": "A personal, casual, and relaxed explanation of why they strictly need to watch this right now based on their mood. Talk to them like a close friend recommending a movie. Don't be formal."}]
     `;
 
     const response = await ai.models.generateContent({
