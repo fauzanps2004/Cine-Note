@@ -27,12 +27,12 @@ export const getMovieRecommendations = async (mood: string, vibe: string, lang: 
       ? `
       Suggest 3 distinct movies for someone who is feeling "${mood}" and wants a "${vibe}" atmosphere.
       Return strictly a JSON array. No markdown formatting, no code blocks.
-      Format: [{"title": "Movie Title", "year": "YYYY", "plot": "Ringkasan plot singkat (maks 20 kata) dalam Bahasa Indonesia.", "reason": "Penjelasan dengan gaya bahasa 'Whiteboard Journal' (campuran Indonesia-Inggris/Indoglish yang intelektual tapi trendi). Gunakan kata-kata seperti 'aesthetic', 'experience', 'nuance', 'layer', 'cult classic'. Jelaskan kenapa film ini adalah 'essential viewing' untuk mood ini secara singkat."}]
+      Format: [{"title": "Movie Title", "year": "YYYY", "plot": "Ringkasan plot singkat (maks 20 kata) dalam Bahasa Indonesia.", "reason": "Berikan alasan dengan gaya bahasa 'Whiteboard Journal' atau 'Anak Jaksel' yang artsy. Campur Bahasa Indonesia dan Inggris (Indoglish) secara natural. Gunakan istilah seperti 'cinematic experience', 'visuals', 'narrative depth', 'vibes', 'cult classic', 'essential viewing'. Nadanya harus terasa terkurasi, estetik, dan sedikit pretensius tapi asik. Maksimal 30 kata."}]
     `
       : `
       Suggest 3 distinct movies for someone who is feeling "${mood}" and wants a "${vibe}" atmosphere.
       Return strictly a JSON array. No markdown formatting, no code blocks.
-      Format: [{"title": "Movie Title", "year": "YYYY", "plot": "Short plot summary (max 20 words) in English.", "reason": "Personal, casual, and friendly explanation in English why they must watch this movie right now based on their mood."}]
+      Format: [{"title": "Movie Title", "year": "YYYY", "plot": "Short plot summary (max 20 words) in English.", "reason": "Personal, witty, and casual explanation in English. Tone: A cinephile best friend texting you. Use slang or film twitter terminology if it fits. Max 30 words."}]
     `;
 
     const response = await ai.models.generateContent({

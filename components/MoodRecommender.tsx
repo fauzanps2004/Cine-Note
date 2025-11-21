@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sparkles, Loader2, Film, X } from 'lucide-react';
 import { GET_MOODS, GET_VIBES, TRANSLATIONS } from '../constants';
 import { getMovieRecommendations } from '../services/geminiService';
@@ -19,6 +19,11 @@ export const MoodRecommender: React.FC<MoodRecommenderProps> = ({ language }) =>
   const t = TRANSLATIONS[language];
   const MOODS = GET_MOODS(language);
   const VIBES = GET_VIBES(language);
+
+  // Clear recommendations when language changes so user generates new ones in correct language
+  useEffect(() => {
+    setRecommendations([]);
+  }, [language]);
 
   const handleGenerate = async () => {
     if (!moodInput.trim() || !vibeInput.trim()) return;
