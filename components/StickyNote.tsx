@@ -162,14 +162,21 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
              ))}
           </div>
 
-          <div className="flex items-center gap-1 text-amber-500 mt-2">
-            <div className="flex">
+          {/* 3D Sticker Style Stars */}
+          <div className="flex items-center gap-1 mt-2">
+            <div className="flex gap-0.5">
               {[...Array(5)].map((_, i) => (
                 <Star 
                   key={i} 
-                  size={12} 
-                  fill={i < review.userRating ? "currentColor" : "none"} 
-                  className={i < review.userRating ? "" : "text-slate-400/50"}
+                  size={16} 
+                  strokeWidth={2.5}
+                  className={`
+                    transition-all duration-300
+                    ${i < review.userRating 
+                      ? "fill-yellow-400 text-orange-700 drop-shadow-[0_1.5px_0_rgba(194,65,12,0.4)]" 
+                      : "text-slate-300 dark:text-slate-600/50 fill-transparent"
+                    }
+                  `}
                 />
               ))}
             </div>
