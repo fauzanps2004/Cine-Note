@@ -3,10 +3,12 @@ import { Navbar } from './components/Navbar';
 import { StickyNote } from './components/StickyNote';
 import { AddReviewForm } from './components/AddReviewForm';
 import { AuthPage } from './components/AuthPage';
+import { ApiKeyModal } from './components/ApiKeyModal';
 import { Review, UserRole, MovieDetails, GamificationState, User } from './types';
 import { LEVEL_MILESTONES, COLOR_VARIANTS } from './constants';
 import { generateMotivationalQuote } from './services/geminiService';
 import { authService } from './services/authService';
+import { hasApiKey } from './services/movieService';
 import { Clapperboard, ArrowDownWideNarrow, ArrowUpNarrowWide } from 'lucide-react';
 
 // Simple ID generator
@@ -25,6 +27,7 @@ function App() {
   });
   const [quote, setQuote] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
 
   // Initialize Auth
   useEffect(() => {
@@ -33,6 +36,13 @@ function App() {
       setUser(currentUser);
     }
     setLoadingAuth(false);
+  }, []);
+
+  // Check for API Key on mount
+  useEffect(() => {
+    if (!hasApiKey()) {
+      setShowApiKeyModal(true);
+    }
   }, []);
 
   // Load Reviews when User changes
@@ -253,6 +263,8 @@ function App() {
       </main>
 
       <AddReviewForm onAdd={handleAddReview} />
+      
+      {showApiKeyModal && <ApiKeyModal onSave={() => setShowApiKeyModal(false)} />}
     </div>
   );
 }

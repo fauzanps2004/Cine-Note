@@ -44,7 +44,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd }) => {
       } else {
         setSearchResults([]);
       }
-    }, 800);
+    }, 500); // Reduced to 500ms for better responsiveness
 
     return () => clearTimeout(delayDebounceFn);
   }, [query]);
@@ -188,7 +188,10 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd }) => {
                   {/* Results List */}
                   <div className="flex-1 overflow-y-auto min-h-0">
                     {!loading && searchResults.length === 0 && query.trim() && (
-                        <p className="text-center text-slate-400 py-8 text-sm">No films found. Keep typing...</p>
+                        <div className="text-center text-slate-400 py-8 flex flex-col items-center">
+                           <Film className="mb-2 opacity-50" size={32} />
+                           <p className="text-sm">Searching for "{query}"...</p>
+                        </div>
                     )}
                     
                     {searchResults.length > 0 && (

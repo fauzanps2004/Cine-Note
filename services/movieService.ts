@@ -1,22 +1,53 @@
 import { MovieDetails, MovieSearchResult } from '../types';
 
-const API_KEY = process.env.OMDB_API_KEY;
 const BASE_URL = 'https://www.omdbapi.com/';
+
+const getApiKey = () => {
+  // specific check to avoid reference errors if process is undefined in some environments
+  const envKey = (typeof process !== 'undefined' && process.env && process.env.OMDB_API_KEY) ? process.env.OMDB_API_KEY : '';
+  return envKey || localStorage.getItem('omdb_api_key') || '';
+};
+
+export const hasApiKey = () => !!getApiKey();
 
 export const searchMovies = async (query: string): Promise<MovieSearchResult[]> => {
   if (!query.trim()) return [];
+  
+  const API_KEY = getApiKey();
   if (!API_KEY) {
-    console.error("OMDB_API_KEY is not set in environment variables.");
+    console.warn("OMDb API Key is missing");
     return [];
   }
 
   try {
-    // s=query for search, type=movie to filter out series/games
-    const response = await fetch(`${BASE_URL}?apikey=${API_KEY}&s=${encodeURIComponent(query)}&type=movie`);
-    const data = await response.json();
+    const encodedQuery = encodeURIComponent(query);
+    
+    // Fetch Page 1
+    const response1 = await fetch(`${BASE_URL}?apikey=${API_KEY}&s=${encodedQuery}&type=movie&page=1`);
+    const data1 = await response1.json();
 
-    if (data.Response === "True" && Array.isArray(data.Search)) {
-      return data.Search.map((item: any) => ({
+    let allResults: any[] = [];
+
+    if (data1.Response === "True" && Array.isArray(data1.Search)) {
+      allResults = [...data1.Search];
+
+      // If there are more results than fit on page 1 (10 items), fetch Page 2 to show more options
+      if (parseInt(data1.totalResults, 10) > 10) {
+        try {
+          const response2 = await fetch(`${BASE_URL}?apikey=${API_KEY}&s=${encodedQuery}&type=movie&page=2`);
+          const data2 = await response2.json();
+          if (data2.Response === "True" && Array.isArray(data2.Search)) {
+            allResults = [...allResults, ...data2.Search];
+          }
+        } catch (e) {
+          // Ignore page 2 errors, just return page 1
+        }
+      }
+
+      // Deduplicate results based on imdbID
+      const uniqueResults = Array.from(new Map(allResults.map(item => [item.imdbID, item])).values());
+
+      return uniqueResults.map((item: any) => ({
         title: item.Title,
         year: item.Year,
         imdbID: item.imdbID,
@@ -24,8 +55,8 @@ export const searchMovies = async (query: string): Promise<MovieSearchResult[]> 
       }));
     }
     
-    if (data.Error && data.Error !== "Movie not found!") {
-        console.warn("OMDb API Error:", data.Error);
+    if (data1.Error && data1.Error !== "Movie not found!") {
+        console.warn("OMDb API Error:", data1.Error);
     }
     
     return [];
@@ -36,6 +67,7 @@ export const searchMovies = async (query: string): Promise<MovieSearchResult[]> 
 };
 
 export const getMovieDetails = async (imdbID: string): Promise<MovieDetails | null> => {
+  const API_KEY = getApiKey();
   if (!API_KEY || !imdbID) return null;
 
   try {
