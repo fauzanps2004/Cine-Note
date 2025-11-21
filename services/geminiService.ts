@@ -27,7 +27,7 @@ export const getMovieRecommendations = async (mood: string, vibe: string, lang: 
       ? `
       Suggest 3 distinct movies for someone who is feeling "${mood}" and wants a "${vibe}" atmosphere.
       Return strictly a JSON array. No markdown formatting, no code blocks.
-      Format: [{"title": "Movie Title", "year": "YYYY", "plot": "Ringkasan plot singkat (maks 20 kata) dalam Bahasa Indonesia.", "reason": "Penjelasan personal, santai, dan gaul (seperti teman ngobrol) dalam Bahasa Indonesia kenapa mereka wajib nonton film ini sekarang sesuai mood mereka."}]
+      Format: [{"title": "Movie Title", "year": "YYYY", "plot": "Ringkasan plot singkat (maks 20 kata) dalam Bahasa Indonesia.", "reason": "Penjelasan dengan gaya bahasa 'Whiteboard Journal' (campuran Indonesia-Inggris/Indoglish yang intelektual tapi trendi). Gunakan kata-kata seperti 'aesthetic', 'experience', 'nuance', 'layer', 'cult classic'. Jelaskan kenapa film ini adalah 'essential viewing' untuk mood ini secara singkat."}]
     `
       : `
       Suggest 3 distinct movies for someone who is feeling "${mood}" and wants a "${vibe}" atmosphere.

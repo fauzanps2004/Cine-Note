@@ -165,11 +165,12 @@ export const MoodRecommender: React.FC<MoodRecommenderProps> = ({ language }) =>
 
           {/* Results */}
           {recommendations.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {recommendations.map((movie, idx) => (
                 <div 
                   key={idx} 
-                  className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-3 border border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-700 transition-colors group flex flex-col h-full"
+                  className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-3 border border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-700 transition-colors group flex flex-col h-full animate-fade-in-up"
+                  style={{ animationDelay: `${idx * 0.15}s`, animationFillMode: 'both' }}
                 >
                   <div className="aspect-[2/3] bg-slate-200 dark:bg-slate-800 rounded-lg mb-3 overflow-hidden relative shadow-sm shrink-0">
                     {movie.posterUrl ? (
