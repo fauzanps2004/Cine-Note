@@ -222,14 +222,27 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index 
         )}
       </div>
 
-      {/* Footer: Meta & Actions */}
-      <div className="mt-3 pt-2 border-t border-black/5 flex justify-between items-center shrink-0">
-        <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold opacity-60">
-           {new Date(review.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-        </span>
+      {/* Footer: Ticket Stub & Actions */}
+      <div className="mt-3 pt-2 flex justify-between items-end shrink-0">
+        
+        {/* Ticket Stub Date Design */}
+        <div className="flex flex-col items-center bg-black/5 dark:bg-black/20 px-3 py-1.5 border-l-2 border-r-2 border-dashed border-black/20 dark:border-white/10 rounded-sm relative overflow-hidden min-w-[80px]">
+           {/* Ticket Top Line */}
+           <div className="absolute top-0 left-0 right-0 h-[1px] bg-black/5"></div>
+           
+           <span className="text-[8px] font-black text-slate-500/60 dark:text-slate-400/60 uppercase tracking-[0.2em] mb-0.5">
+             WATCHED
+           </span>
+           <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-200 tracking-tighter">
+             {new Date(review.createdAt).toLocaleDateString(undefined, { year: '2-digit', month: 'short', day: 'numeric' }).toUpperCase()}
+           </span>
+
+           {/* Ticket Bottom Line */}
+           <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-black/5"></div>
+        </div>
         
         <div 
-          className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 mb-1"
           data-html2canvas-ignore // Don't include action buttons in the screenshot
         >
           <button 
