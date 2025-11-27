@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { getUpcomingMovies } from '../services/geminiService';
-import { searchMovies } from '../services/movieService';
+import { getCinemaSchedule } from '../services/movieService';
 import { UpcomingMovie, Language } from '../types';
 import { TRANSLATIONS } from '../constants';
 import { CalendarClock, PlayCircle, Film, Calendar } from 'lucide-react';
@@ -9,40 +8,6 @@ import { CalendarClock, PlayCircle, Film, Calendar } from 'lucide-react';
 interface UpcomingBannerProps {
   language: Language;
 }
-
-// Helper to find best poster recursively
-const findBestPoster = async (searchTitle: string, originalTitle: string, year?: string): Promise<string | null> => {
-  const getValidPosters = (results: any[]) => {
-    return results.filter(r => r.posterUrl && r.posterUrl !== "N/A" && r.posterUrl.startsWith('http'));
-  };
-
-  // Strategy 1: Try Search Title (English/Optimized) + Year
-  if (searchTitle) {
-    let results = await searchMovies(searchTitle, year);
-    let validResults = getValidPosters(results);
-    if (validResults.length > 0) return validResults[0].posterUrl || null;
-  }
-
-  // Strategy 2: Try Original Title
-  if (originalTitle && originalTitle !== searchTitle) {
-    let results = await searchMovies(originalTitle, year);
-    let validResults = getValidPosters(results);
-    if (validResults.length > 0) return validResults[0].posterUrl || null;
-  }
-
-  // Strategy 3: Try Cleaning Title
-  const cleanTitle = (t: string) => t.split(/[:|-]/)[0].trim();
-  if (searchTitle && (searchTitle.includes(':') || searchTitle.includes('-'))) {
-    const clean = cleanTitle(searchTitle);
-    if (clean.length > 2) {
-      let results = await searchMovies(clean, year);
-      let validResults = getValidPosters(results);
-      if (validResults.length > 0) return validResults[0].posterUrl || null;
-    }
-  }
-
-  return null;
-};
 
 export const UpcomingBanner: React.FC<UpcomingBannerProps> = ({ language }) => {
   const [movies, setMovies] = useState<UpcomingMovie[]>([]);
@@ -54,15 +19,8 @@ export const UpcomingBanner: React.FC<UpcomingBannerProps> = ({ language }) => {
     const fetchMovies = async () => {
       setLoading(true);
       try {
-        const rawMovies = await getUpcomingMovies();
-        const enrichedMovies = await Promise.all(
-          rawMovies.map(async (movie) => {
-            const searchT = movie.searchTitle || movie.title;
-            const posterUrl = await findBestPoster(searchT, movie.title, movie.year);
-            return { ...movie, posterUrl };
-          })
-        );
-        setMovies(enrichedMovies);
+        const schedule = await getCinemaSchedule();
+        setMovies(schedule);
       } catch (error) {
         console.error("Failed to load upcoming movies", error);
       } finally {

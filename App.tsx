@@ -245,6 +245,14 @@ function App() {
         </main>
       </div>
 
+      {/* MOBILE FLOATING ACTION BUTTON */}
+      <button
+        onClick={() => setIsAddReviewOpen(true)}
+        className="lg:hidden fixed bottom-6 right-6 w-14 h-14 bg-brand-600 text-white rounded-full shadow-xl flex items-center justify-center z-50 hover:bg-brand-700 active:scale-95 transition-all"
+      >
+        <Plus size={28} />
+      </button>
+
       <AddReviewForm isOpen={isAddReviewOpen} onClose={handleCloseModal} onAdd={handleAddReview} onUpdate={handleUpdateReview} language={language} initialData={editingReview} />
     </div>
   );

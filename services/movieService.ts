@@ -1,5 +1,5 @@
 
-import { MovieDetails, MovieSearchResult } from '../types';
+import { MovieDetails, MovieSearchResult, UpcomingMovie } from '../types';
 
 // Using a public TMDB API Key for client-side requests to ensure immediate functionality
 const API_KEY = '15d2ea6d0dc1d476efbca3eba2b9bbfb';
@@ -9,6 +9,13 @@ const IMAGE_LARGE_URL = 'https://image.tmdb.org/t/p/original';
 
 // Helper to normalize strings for comparison (remove special chars, lowercase)
 const normalize = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+const GENRE_MAP: Record<number, string> = {
+  28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy", 80: "Crime",
+  99: "Documentary", 18: "Drama", 10751: "Family", 14: "Fantasy", 36: "History",
+  27: "Horror", 10402: "Music", 9648: "Mystery", 10749: "Romance", 878: "Sci-Fi",
+  10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western"
+};
 
 export const searchMovies = async (query: string, year?: string): Promise<MovieSearchResult[]> => {
   if (!query.trim()) return [];
@@ -111,5 +118,45 @@ export const getMovieDetails = async (id: string): Promise<MovieDetails | null> 
   } catch (error) {
     console.error("TMDB Details Failed:", error);
     throw new Error("Failed to fetch movie details.");
+  }
+};
+
+export const getCinemaSchedule = async (): Promise<UpcomingMovie[]> => {
+  try {
+    const [nowPlayingRes, upcomingRes] = await Promise.all([
+      fetch(`${BASE_URL}/movie/now_playing?api_key=${API_KEY}&language=id-ID&region=ID&page=1`),
+      fetch(`${BASE_URL}/movie/upcoming?api_key=${API_KEY}&language=id-ID&region=ID&page=1`)
+    ]);
+
+    const nowPlayingData = await nowPlayingRes.json();
+    const upcomingData = await upcomingRes.json();
+
+    const mapMovie = (m: any, status: 'now_playing' | 'coming_soon'): UpcomingMovie => {
+      const genreName = m.genre_ids && m.genre_ids.length > 0 ? GENRE_MAP[m.genre_ids[0]] : "Movie";
+      return {
+        title: m.title,
+        searchTitle: m.original_title,
+        year: m.release_date ? m.release_date.substring(0, 4) : new Date().getFullYear().toString(),
+        releaseDate: m.release_date ? new Date(m.release_date).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : "",
+        platform: 'Bioskop',
+        genre: genreName || "Movie",
+        status: status,
+        posterUrl: m.poster_path ? `${IMAGE_LARGE_URL}${m.poster_path}` : null
+      };
+    };
+
+    const nowPlaying = (nowPlayingData.results || []).slice(0, 5).map((m: any) => mapMovie(m, 'now_playing'));
+    
+    // Filter upcoming to only show movies releasing in the future
+    const today = new Date();
+    const upcoming = (upcomingData.results || [])
+      .filter((m: any) => new Date(m.release_date) > today)
+      .slice(0, 5)
+      .map((m: any) => mapMovie(m, 'coming_soon'));
+
+    return [...nowPlaying, ...upcoming];
+  } catch (error) {
+    console.error("Failed to fetch cinema schedule:", error);
+    return [];
   }
 };
