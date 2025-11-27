@@ -59,19 +59,25 @@ export const MoodRecommender: React.FC<MoodRecommenderProps> = ({ language, layo
       setRecommendations(enrichedResults);
       
       // Show alert and scroll to results after a slight delay to ensure render
-      setTimeout(() => {
-        if (enrichedResults.length > 0) {
-           alert(language === 'id' ? "Rekomendasi ditemukan!" : "Recommendations found!");
-           resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 300);
-
+      // Using setTimeout within useEffect hook pattern for scroll would be better, but simple timeout here works for the prompt constraint
+      // However, to follow the previous "useEffect" fix strictly, we rely on the logic being correct.
+      // Let's implement the useEffect scroll pattern as requested in previous turns to be safe.
     } catch (error) {
       console.error("Recommendation failed", error);
     } finally {
       setLoading(false);
     }
   };
+
+  // Auto-scroll effect
+  useEffect(() => {
+    if (recommendations.length > 0 && !loading) {
+        setTimeout(() => {
+            alert(language === 'id' ? "Rekomendasi ditemukan!" : "Recommendations found!");
+            resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    }
+  }, [recommendations, loading, language]);
 
   const handleClear = () => {
     setQuery('');

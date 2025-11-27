@@ -176,13 +176,14 @@ function App() {
             
             {/* Header */}
             <div className="shrink-0 px-6 sm:px-8 py-6 z-10 border-b border-slate-200/60 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
-               <div className="flex flex-col sm:flex-row items-end justify-between gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                  <div className="flex items-center gap-4">
-                    {/* Avatar */}
-                    <div className="hidden sm:flex w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 items-center justify-center text-white text-2xl font-bold shadow-lg shadow-brand-500/20">
+               <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-4 sm:gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                  <div className="flex items-center gap-4 w-full sm:w-auto justify-center sm:justify-start">
+                    {/* Avatar (Hidden on Mobile) */}
+                    <div className="hidden sm:flex w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 items-center justify-center text-white text-2xl font-bold shadow-lg shadow-brand-500/20 shrink-0">
                        {user.username.substring(0, 2).toUpperCase()}
                     </div>
-                    <div>
+                    
+                    <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
                       <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
                         {t.diary_of} <span className="text-brand-600 dark:text-brand-400">{user.username}</span>
                       </h1>
@@ -195,7 +196,7 @@ function App() {
                     </div>
                   </div>
                   
-                  <div className="flex gap-3 w-full sm:w-auto">
+                  <div className="flex gap-3 w-full sm:w-auto justify-center">
                     <button 
                       onClick={toggleSort} 
                       className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 transition-all text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"

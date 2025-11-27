@@ -91,7 +91,7 @@ export const UpcomingBanner: React.FC<UpcomingBannerProps> = ({ language }) => {
                  </span>
             </div>
 
-            {/* Main Content Area - Added pt-8 for spacing from badge */}
+            {/* Main Content Area - Added pt-12 for extra spacing from badge */}
             <div className="relative z-20 flex flex-col items-center justify-center p-8 pt-12 text-center w-full">
               
               {/* Hero Poster */}
