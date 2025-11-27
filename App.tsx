@@ -9,7 +9,7 @@ import { UpcomingBanner } from './components/UpcomingBanner';
 import { Review, UserRole, MovieDetails, GamificationState, User, Language } from './types';
 import { GET_LEVEL_MILESTONES, COLOR_VARIANTS, TRANSLATIONS } from './constants';
 import { authService } from './services/authService';
-import { ArrowDownWideNarrow, ArrowUpNarrowWide, Plus, Film, Sparkles, LayoutDashboard, Loader2 } from 'lucide-react';
+import { ArrowDownWideNarrow, ArrowUpNarrowWide, Plus, Film, Sparkles, LayoutDashboard, Loader2, BookOpen, Compass } from 'lucide-react';
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -22,6 +22,9 @@ function App() {
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [isAddReviewOpen, setIsAddReviewOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<Review | null>(null);
+  
+  // Mobile Tab State
+  const [activeMobileTab, setActiveMobileTab] = useState<'diary' | 'explore'>('diary');
 
   const t = TRANSLATIONS[language];
 
@@ -139,8 +142,7 @@ function App() {
 
       <div className="flex-1 flex overflow-hidden w-full max-w-[1920px] mx-auto">
         
-        {/* LEFT SIDEBAR (Discovery) */}
-        {/* White background for hierarchy distinction */}
+        {/* LEFT SIDEBAR (Discovery) - DESKTOP ONLY */}
         <aside className="hidden lg:flex flex-col w-[380px] xl:w-[420px] shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-y-auto scrollbar-thin z-10">
            <div className="p-6 flex flex-col gap-8">
               
@@ -155,7 +157,6 @@ function App() {
 
               {/* Widget: Mood */}
               <section>
-                 {/* Removed Film icon as requested */}
                  <div className="flex items-center gap-2 mb-4 px-1">
                     <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t.mood_title}</h3>
                  </div>
@@ -165,93 +166,122 @@ function App() {
            </div>
         </aside>
 
-        {/* RIGHT MAIN CONTENT (Diary) */}
-        {/* Slightly off-white/slate background for content area */}
+        {/* MAIN CONTENT AREA */}
         <main className="flex-1 flex flex-col min-w-0 h-full relative bg-slate-50/50 dark:bg-slate-950">
           
-          {/* Main Header (Sticky) */}
-          <div className="shrink-0 px-8 py-6 z-10 border-b border-slate-200/60 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
-             
-             {/* Mobile Widgets */}
-             <div className="lg:hidden mb-8 space-y-6">
-                <UpcomingBanner language={language} />
-                <MoodRecommender language={language} layout="horizontal" />
-             </div>
-
-             <div className="flex flex-col sm:flex-row items-end justify-between gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                <div className="flex items-center gap-4">
-                  {/* Avatar Placeholder / Profile Icon */}
-                  <div className="hidden sm:flex w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 items-center justify-center text-white text-2xl font-bold shadow-lg shadow-brand-500/20">
-                     {user.username.substring(0, 2).toUpperCase()}
-                  </div>
-                  <div>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                      {t.diary_of} <span className="text-brand-600 dark:text-brand-400">{user.username}</span>
-                    </h1>
-                    <div className="flex items-center gap-4 mt-2">
-                       <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                          <LayoutDashboard size={14} className="text-slate-500" />
-                          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{reviews.length} {t.films_logged}</span>
-                       </div>
+          {/* CONTENT SWITCHER FOR MOBILE */}
+          
+          {/* 1. DIARY TAB (Default Mobile & Desktop) */}
+          <div className={`flex-col h-full ${activeMobileTab === 'diary' ? 'flex' : 'hidden lg:flex'}`}>
+            
+            {/* Header */}
+            <div className="shrink-0 px-6 sm:px-8 py-6 z-10 border-b border-slate-200/60 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+               <div className="flex flex-col sm:flex-row items-end justify-between gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                  <div className="flex items-center gap-4">
+                    {/* Avatar */}
+                    <div className="hidden sm:flex w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 items-center justify-center text-white text-2xl font-bold shadow-lg shadow-brand-500/20">
+                       {user.username.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                        {t.diary_of} <span className="text-brand-600 dark:text-brand-400">{user.username}</span>
+                      </h1>
+                      <div className="flex items-center gap-4 mt-2">
+                         <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                            <LayoutDashboard size={14} className="text-slate-500" />
+                            <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{reviews.length} {t.films_logged}</span>
+                         </div>
+                      </div>
                     </div>
                   </div>
+                  
+                  <div className="flex gap-3 w-full sm:w-auto">
+                    <button 
+                      onClick={toggleSort} 
+                      className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 transition-all text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                    >
+                      {sortOrder === 'desc' ? <ArrowDownWideNarrow size={18} /> : <ArrowUpNarrowWide size={18} />}
+                      <span className="inline">{sortOrder === 'desc' ? t.sort_newest : t.sort_oldest}</span>
+                    </button>
+                    {/* Desktop Add Button */}
+                    <button 
+                      onClick={() => setIsAddReviewOpen(true)} 
+                      className="hidden sm:flex flex-1 sm:flex-none justify-center items-center gap-2 px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-0.5 active:translate-y-0 text-sm font-bold"
+                    >
+                      <Plus size={18} strokeWidth={3} />
+                      {t.add_review_btn}
+                    </button>
+                  </div>
+               </div>
+            </div>
+
+            {/* Scrollable Grid */}
+            <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-8 scrollbar-thin pb-24 lg:pb-8">
+              {sortedReviews.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                  {sortedReviews.map((review, index) => (
+                    <StickyNote 
+                      key={review.id} review={review} onDelete={handleDeleteReview} onEdit={handleEditClick} index={index} language={language}
+                    />
+                  ))}
                 </div>
-                
-                <div className="flex gap-3 w-full sm:w-auto">
+              ) : (
+                <div className="flex flex-col items-center justify-center h-[50vh] text-center animate-fade-in text-slate-400 dark:text-slate-500">
+                  <div className="w-24 h-24 mb-6 rounded-3xl bg-slate-100 dark:bg-slate-800/50 flex items-center justify-center shadow-inner">
+                      <Film size={40} className="opacity-30" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-slate-700 dark:text-slate-200">{t.empty_title}</h3>
+                  <p className="max-w-md text-sm">{t.empty_subtitle}</p>
                   <button 
-                    onClick={toggleSort} 
-                    className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 transition-all text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                    onClick={() => setIsAddReviewOpen(true)}
+                    className="mt-6 text-brand-600 hover:text-brand-700 font-bold text-sm hover:underline"
                   >
-                    {sortOrder === 'desc' ? <ArrowDownWideNarrow size={18} /> : <ArrowUpNarrowWide size={18} />}
-                    <span className="hidden sm:inline">{sortOrder === 'desc' ? t.sort_newest : t.sort_oldest}</span>
-                  </button>
-                  <button 
-                    onClick={() => setIsAddReviewOpen(true)} 
-                    className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-0.5 active:translate-y-0 text-sm font-bold"
-                  >
-                    <Plus size={18} strokeWidth={3} />
                     {t.add_review_btn}
                   </button>
                 </div>
+              )}
+            </div>
+          </div>
+
+          {/* 2. EXPLORE TAB (Mobile Only) */}
+          <div className={`flex-col h-full overflow-y-auto pb-24 px-6 pt-6 ${activeMobileTab === 'explore' ? 'flex lg:hidden' : 'hidden'}`}>
+             <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-6">Explore</h1>
+             <div className="space-y-8">
+                <UpcomingBanner language={language} />
+                <MoodRecommender language={language} layout="vertical" />
              </div>
           </div>
 
-          {/* Scrollable Grid */}
-          <div className="flex-1 overflow-y-auto px-8 py-10 scrollbar-thin">
-            {sortedReviews.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pb-20">
-                {sortedReviews.map((review, index) => (
-                  <StickyNote 
-                    key={review.id} review={review} onDelete={handleDeleteReview} onEdit={handleEditClick} index={index} language={language}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fade-in text-slate-400 dark:text-slate-500">
-                <div className="w-24 h-24 mb-6 rounded-3xl bg-slate-100 dark:bg-slate-800/50 flex items-center justify-center shadow-inner">
-                    <Film size={40} className="opacity-30" />
-                </div>
-                <h3 className="text-xl font-bold mb-2 text-slate-700 dark:text-slate-200">{t.empty_title}</h3>
-                <p className="max-w-md text-sm">{t.empty_subtitle}</p>
-                <button 
-                  onClick={() => setIsAddReviewOpen(true)}
-                  className="mt-6 text-brand-600 hover:text-brand-700 font-bold text-sm hover:underline"
-                >
-                  {t.add_review_btn}
-                </button>
-              </div>
-            )}
-          </div>
         </main>
       </div>
 
-      {/* MOBILE FLOATING ACTION BUTTON */}
-      <button
-        onClick={() => setIsAddReviewOpen(true)}
-        className="lg:hidden fixed bottom-6 right-6 w-14 h-14 bg-brand-600 text-white rounded-full shadow-xl flex items-center justify-center z-50 hover:bg-brand-700 active:scale-95 transition-all"
-      >
-        <Plus size={28} />
-      </button>
+      {/* MOBILE FLOATING ACTION BUTTON (Visible on Diary tab) */}
+      {activeMobileTab === 'diary' && (
+        <button
+          onClick={() => setIsAddReviewOpen(true)}
+          className="lg:hidden fixed bottom-20 right-6 w-14 h-14 bg-brand-600 text-white rounded-full shadow-xl flex items-center justify-center z-40 hover:bg-brand-700 active:scale-95 transition-all"
+        >
+          <Plus size={28} />
+        </button>
+      )}
+
+      {/* MOBILE BOTTOM NAVIGATION */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-around items-center h-16 z-50 pb-safe">
+         <button 
+            onClick={() => setActiveMobileTab('diary')}
+            className={`flex flex-col items-center justify-center w-full h-full gap-1 ${activeMobileTab === 'diary' ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400 dark:text-slate-500'}`}
+         >
+            <BookOpen size={20} strokeWidth={activeMobileTab === 'diary' ? 2.5 : 2} />
+            <span className="text-[10px] font-bold">Diari</span>
+         </button>
+         <button 
+            onClick={() => setActiveMobileTab('explore')}
+            className={`flex flex-col items-center justify-center w-full h-full gap-1 ${activeMobileTab === 'explore' ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400 dark:text-slate-500'}`}
+         >
+            <Compass size={20} strokeWidth={activeMobileTab === 'explore' ? 2.5 : 2} />
+            <span className="text-[10px] font-bold">Eksplor</span>
+         </button>
+      </div>
 
       <AddReviewForm isOpen={isAddReviewOpen} onClose={handleCloseModal} onAdd={handleAddReview} onUpdate={handleUpdateReview} language={language} initialData={editingReview} />
     </div>
