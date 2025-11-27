@@ -1,18 +1,1 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 20px;
-}
-.dark ::-webkit-scrollbar-thumb {
-  background-color: #334155;
-}
+/* This file is no longer used as we reverted to Tailwind CDN in index.html */

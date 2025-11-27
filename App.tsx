@@ -9,7 +9,7 @@ import { UpcomingBanner } from './components/UpcomingBanner';
 import { Review, UserRole, MovieDetails, GamificationState, User, Language } from './types';
 import { GET_LEVEL_MILESTONES, COLOR_VARIANTS, TRANSLATIONS } from './constants';
 import { authService } from './services/authService';
-import { ArrowDownWideNarrow, ArrowUpNarrowWide, Plus } from 'lucide-react';
+import { ArrowDownWideNarrow, ArrowUpNarrowWide, Plus, Film } from 'lucide-react';
 
 // Simple ID generator
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -268,99 +268,80 @@ function App() {
           className="mb-10 text-center sm:text-left flex flex-col sm:flex-row items-end justify-between gap-4 animate-fade-in-up"
           style={{ animationDelay: '0.1s', animationFillMode: 'both' }}
         >
-          <div className="w-full sm:w-auto">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-800 dark:text-white tracking-tight mb-2">
-              {t.diary_of} <span className="text-brand-600 dark:text-brand-400">{user.username}</span>
-            </h1>
-            
-            {/* Add Review Button (Moved to Top) */}
-            <button 
-              onClick={() => setIsAddReviewOpen(true)}
-              className="mt-4 inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-md shadow-brand-600/20 transition-all hover:-translate-y-0.5 active:scale-95"
-            >
-              <Plus size={20} />
-              <span>{t.add_review_btn}</span>
-            </button>
+          <div>
+             <h1 className="text-3xl sm:text-4xl font-bold text-slate-800 dark:text-white mb-2 font-hand">
+               {t.diary_of} <span className="text-brand-600 dark:text-brand-400">{user.username}</span>
+             </h1>
+             <p className="text-slate-500 dark:text-slate-400 flex items-center justify-center sm:justify-start gap-2">
+               <Film size={16} />
+               <span>{reviews.length} {t.films_logged}</span>
+             </p>
           </div>
           
-          <div className="text-right hidden sm:block">
-            <span className="text-6xl font-black text-slate-200 dark:text-slate-800 leading-none select-none">
-              {reviews.length.toString().padStart(2, '0')}
-            </span>
-            <span className="block text-xs font-bold text-slate-400 uppercase tracking-widest mr-1">
-              {t.films_logged}
-            </span>
+          <div className="flex gap-3">
+             <button 
+               onClick={toggleSort}
+               className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md transition-all text-sm font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+             >
+               {sortOrder === 'desc' ? <ArrowDownWideNarrow size={18} /> : <ArrowUpNarrowWide size={18} />}
+               {sortOrder === 'desc' ? t.sort_newest : t.sort_oldest}
+             </button>
+             
+             <button 
+               onClick={() => setIsAddReviewOpen(true)}
+               className="flex items-center gap-2 px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl shadow-lg shadow-brand-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold"
+             >
+               <Plus size={18} strokeWidth={3} />
+               {t.add_review_btn}
+             </button>
           </div>
         </div>
 
-        {/* Sort Control */}
-        {reviews.length > 0 && (
-          <div 
-            className="flex justify-end mb-6 animate-fade-in-up"
-            style={{ animationDelay: '0.2s', animationFillMode: 'both' }}
-          >
-            <button
-              onClick={toggleSort}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-200 dark:hover:border-slate-600 transition-all"
-            >
-              {sortOrder === 'desc' ? (
-                <>
-                  <span>{t.sort_newest}</span>
-                  <ArrowDownWideNarrow size={16} />
-                </>
-              ) : (
-                <>
-                  <span>{t.sort_oldest}</span>
-                  <ArrowUpNarrowWide size={16} />
-                </>
-              )}
-            </button>
-          </div>
-        )}
+        {/* Mood Recommender */}
+        <MoodRecommender language={language} />
 
-        {/* Empty State */}
-        {reviews.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-3xl bg-slate-50/50 dark:bg-slate-900/50 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <h3 className="text-xl font-bold text-slate-700 dark:text-slate-200">{t.empty_title}</h3>
-            <p className="text-slate-500 dark:text-slate-400 mt-2 text-center max-w-xs">
-              {t.empty_subtitle}
-            </p>
-          </div>
-        )}
-
-        {/* Review Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 sm:gap-6">
-          {sortedReviews.map((review, index) => (
-            <div 
-              key={review.id} 
-              className="animate-fade-in-up w-full"
-              // Add a base delay of 0.3s so items appear after the header
-              style={{ animationDelay: `${(Math.min(index * 0.07, 1)) + 0.3}s`, animationFillMode: 'both' }}
-            >
+        {/* REVIEWS GRID */}
+        {sortedReviews.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {sortedReviews.map((review, index) => (
               <StickyNote 
+                key={review.id} 
                 review={review} 
-                index={index} 
-                onDelete={handleDeleteReview} 
+                onDelete={handleDeleteReview}
                 onEdit={handleEditClick}
+                index={index}
                 language={language}
               />
-            </div>
-          ))}
-        </div>
-
-        {/* AI RECOMMENDATION SECTION */}
-        <MoodRecommender language={language} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in text-slate-400 dark:text-slate-500">
+             <div className="w-24 h-24 mb-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                <Film size={40} className="opacity-50" />
+             </div>
+             <h3 className="text-xl font-bold mb-2 text-slate-600 dark:text-slate-300">{t.empty_title}</h3>
+             <p className="max-w-md">{t.empty_subtitle}</p>
+             <button 
+               onClick={() => setIsAddReviewOpen(true)}
+               className="mt-6 text-brand-600 dark:text-brand-400 font-bold hover:underline"
+             >
+               {t.add_review_btn}
+             </button>
+          </div>
+        )}
 
       </main>
 
+      {/* Add/Edit Modal */}
       <AddReviewForm 
-        onAdd={handleAddReview} 
+        isOpen={isAddReviewOpen} 
+        onClose={handleCloseModal} 
+        onAdd={handleAddReview}
         onUpdate={handleUpdateReview}
-        isOpen={isAddReviewOpen}
-        onClose={handleCloseModal}
         language={language}
         initialData={editingReview}
       />
+
     </div>
   );
 }
