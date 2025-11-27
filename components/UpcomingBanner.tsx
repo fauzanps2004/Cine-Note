@@ -120,8 +120,8 @@ export const UpcomingBanner: React.FC<UpcomingBannerProps> = ({ language }) => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
             </div>
 
-            {/* Badge (Top Center) */}
-            <div className="absolute top-6 left-0 right-0 flex justify-center z-30">
+            {/* Badge (Top Center) - Increased top spacing to top-8 */}
+            <div className="absolute top-8 left-0 right-0 flex justify-center z-30">
                  <span className={`
                     inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg backdrop-blur-md border
                     ${movie.status === 'now_playing' 
@@ -133,8 +133,8 @@ export const UpcomingBanner: React.FC<UpcomingBannerProps> = ({ language }) => {
                  </span>
             </div>
 
-            {/* Main Content Area */}
-            <div className="relative z-20 flex flex-col items-center justify-center p-8 text-center w-full">
+            {/* Main Content Area - Added pt-8 for spacing from badge */}
+            <div className="relative z-20 flex flex-col items-center justify-center p-8 pt-12 text-center w-full">
               
               {/* Hero Poster */}
               <div className="w-36 aspect-[2/3] rounded-xl overflow-hidden shadow-2xl border border-white/10 mb-6 transform transition-transform duration-700 hover:scale-105 bg-black/50 shadow-black/50">

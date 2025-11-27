@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Loader2, Film, Search, ArrowRight } from 'lucide-react';
 import { GET_QUICK_PICKS, TRANSLATIONS } from '../constants';
 import { getMovieRecommendations } from '../services/geminiService';
@@ -15,6 +15,7 @@ export const MoodRecommender: React.FC<MoodRecommenderProps> = ({ language, layo
   const [query, setQuery] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<MovieRecommendation[]>([]);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const t = TRANSLATIONS[language];
   const QUICK_PICKS = GET_QUICK_PICKS(language);
@@ -56,18 +57,19 @@ export const MoodRecommender: React.FC<MoodRecommenderProps> = ({ language, layo
       );
 
       setRecommendations(enrichedResults);
+      
+      // Show alert and scroll to results after a slight delay to ensure render
+      setTimeout(() => {
+        if (enrichedResults.length > 0) {
+           alert(language === 'id' ? "Rekomendasi ditemukan!" : "Recommendations found!");
+           resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300);
+
     } catch (error) {
       console.error("Recommendation failed", error);
     } finally {
       setLoading(false);
-      // Auto-scroll to results logic removed here as requested in previous steps? 
-      // Re-adding alert logic as requested in previous step (missed in this file content update)
-      // Note: In a real react app, we'd use a toast library. Here we'll just set state or assume user sees it.
-      // For this specific request "fix font", I will focus on the font.
-      if (typeof window !== 'undefined') {
-        // Simple visual feedback since we don't have a toast component
-        // window.alert("Rekomendasi ditemukan!"); // Removed to be less intrusive, relying on UI update
-      }
     }
   };
 
@@ -141,7 +143,7 @@ export const MoodRecommender: React.FC<MoodRecommenderProps> = ({ language, layo
           
       {/* Results List - Vertically stacked if sidebar, Grid if horizontal */}
       {recommendations.length > 0 && (
-        <div className={`mt-6 grid ${isVertical ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-3 gap-6'} animate-fade-in pb-10`}>
+        <div ref={resultsRef} className={`mt-6 grid ${isVertical ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-3 gap-6'} animate-fade-in pb-10`}>
           {recommendations.map((movie, idx) => (
             <div 
               key={idx} 
