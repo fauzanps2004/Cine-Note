@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Loader2, Film, Search, ArrowRight } from 'lucide-react';
+import { Loader2, Film, Search, ArrowRight } from 'lucide-react';
 import { GET_QUICK_PICKS, TRANSLATIONS } from '../constants';
 import { getMovieRecommendations } from '../services/geminiService';
 import { searchMovies } from '../services/movieService';
@@ -77,8 +77,7 @@ export const MoodRecommender: React.FC<MoodRecommenderProps> = ({ language, layo
         {/* Header Panel */}
         <div className={`bg-brand-600 p-6 ${isVertical ? 'w-full py-8' : 'lg:w-[35%]'} text-white relative overflow-hidden flex flex-col justify-center shrink-0`}>
           <div className="relative z-10">
-            <h2 className="text-2xl font-bold flex items-center gap-2 font-hand tracking-wide mb-1">
-              <Sparkles className="text-yellow-300 w-6 h-6" />
+            <h2 className="text-2xl font-bold font-sans tracking-tight mb-1">
               {t.mood_title}
             </h2>
             <p className="text-brand-100 text-sm leading-relaxed opacity-90 font-medium">
