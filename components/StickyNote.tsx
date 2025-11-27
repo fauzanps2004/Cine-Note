@@ -121,17 +121,18 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, onEdit
         group relative flex flex-col p-5 h-96 w-full 
         ${colorClasses} 
         ${isDeleting ? 'opacity-0 scale-75 pointer-events-none translate-y-8' : `${rotation} hover:rotate-0 hover:scale-[1.02] hover:-translate-y-2 hover:z-20`}
-        shadow-lg hover:shadow-2xl
+        shadow-lg hover:shadow-2xl hover:shadow-black/10
         transition-all duration-300 ease-out cursor-default
-        border-t-8 font-sans overflow-hidden
+        border border-black/5 dark:border-white/5
+        font-sans overflow-hidden rounded-sm
       `}
     >
-      {/* Tape effect at top */}
-      <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-4 bg-white/30 backdrop-blur-sm shadow-sm rotate-1 z-20"></div>
+      {/* Refined Tape Effect - Less jarring */}
+      <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-6 bg-white/40 shadow-sm rotate-1 z-20 backdrop-blur-[1px] opacity-80"></div>
 
       {/* Header: Poster & Info */}
-      <div className="flex gap-3 mb-4 pb-3 border-b border-black/5">
-        <div className="shrink-0 w-20 h-28 bg-slate-200 dark:bg-slate-800 rounded shadow-sm overflow-hidden relative">
+      <div className="flex gap-4 mb-4 pb-4 border-b border-black/5">
+        <div className="shrink-0 w-20 aspect-[2/3] bg-slate-200 dark:bg-slate-800 rounded-sm shadow-sm overflow-hidden relative">
           {!imgError && review.movieDetails.posterUrl ? (
             <img 
               src={review.movieDetails.posterUrl} 
@@ -146,36 +147,28 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, onEdit
           )}
         </div>
 
-        <div className="flex-1 min-w-0 flex flex-col py-0.5">
+        <div className="flex-1 min-w-0 flex flex-col pt-1">
           <div>
-             <h3 className="font-bold text-lg leading-tight text-slate-800 dark:text-slate-100 line-clamp-2 font-hand tracking-wide">
+             <h3 className="font-bold text-lg leading-tight text-slate-800 dark:text-slate-100 line-clamp-2 tracking-tight">
               {review.movieDetails.title}
             </h3>
-            <span className="text-xs font-mono text-slate-600 dark:text-slate-300 block mt-1 opacity-70">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 block mt-1">
               {review.movieDetails.year}
             </span>
           </div>
           
-          <div className="flex flex-wrap gap-1 mt-2 mb-auto">
-             {review.movieDetails.genre.slice(0, 2).map(g => (
-               <span key={g} className="text-[10px] px-1.5 py-0.5 bg-black/5 dark:bg-white/10 rounded text-slate-600 dark:text-slate-300 border border-black/5">
-                 {g}
-               </span>
-             ))}
-          </div>
-
-          <div className="flex items-center gap-1 mt-2">
+          <div className="mt-auto">
             <div className="flex gap-0.5">
               {[...Array(5)].map((_, i) => (
                 <Star 
                   key={i} 
-                  size={16} 
-                  strokeWidth={2.5}
+                  size={14} 
+                  strokeWidth={2}
                   className={`
                     transition-all duration-300
                     ${i < review.userRating 
-                      ? "fill-yellow-400 text-orange-700 drop-shadow-[0_1.5px_0_rgba(194,65,12,0.4)]" 
-                      : "text-slate-300 dark:text-slate-600/50 fill-transparent"
+                      ? "fill-amber-400 text-amber-500 drop-shadow-[0_1px_0_rgba(180,83,9,0.2)]" 
+                      : "text-slate-400/30 fill-transparent"
                     }
                   `}
                 />
@@ -186,9 +179,10 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, onEdit
       </div>
 
       {/* Body: Review Content */}
-      <div className="flex-1 min-h-0 relative group-inner px-1 flex flex-col">
+      <div className="flex-1 min-h-0 relative px-1 flex flex-col">
+        {/* Quote Icon watermark */}
          {hasContent && (
-            <Quote className="absolute top-0 right-0 text-black/5 dark:text-white/5 w-12 h-12 rotate-12 pointer-events-none" />
+            <Quote className="absolute -top-2 -right-2 text-black/5 dark:text-white/5 w-16 h-16 pointer-events-none" />
          )}
         
         <div className={`flex-1 overflow-y-auto scrollbar-thin pr-2 ${!hasContent ? 'flex items-center justify-center' : ''}`}>
@@ -198,7 +192,9 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, onEdit
             </p>
           ) : (
              <div className="text-center opacity-40 select-none">
-                <span className="text-3xl font-hand -rotate-6 block text-slate-800 dark:text-slate-200">{t.just_watched_watermark}</span>
+                <span className="text-2xl font-bold font-hand -rotate-6 block text-slate-800 dark:text-slate-200 border-2 border-slate-800 dark:border-slate-200 px-4 py-2 rounded-lg opacity-50">
+                  {t.just_watched_watermark}
+                </span>
              </div>
           )}
         </div>
@@ -206,60 +202,57 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, onEdit
         {shouldTruncate && (
           <button 
             onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
-            className="mt-2 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-1 uppercase tracking-wider self-start transition-colors"
+            className="mt-2 text-[10px] font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-1 uppercase tracking-widest self-start transition-colors"
             data-html2canvas-ignore
           >
             {isExpanded ? (
-              <>{t.close} <ChevronUp size={12} /></>
+              <>{t.close} <ChevronUp size={10} /></>
             ) : (
-              <>{t.read_more} <ChevronDown size={12} /></>
+              <>{t.read_more} <ChevronDown size={10} /></>
             )}
           </button>
         )}
       </div>
 
-      {/* Footer: Ticket Stub & Actions */}
-      <div className="mt-3 pt-2 flex justify-between items-end shrink-0">
+      {/* Footer */}
+      <div className="mt-4 pt-3 flex justify-between items-center shrink-0 border-t border-black/5">
         
-        <div className="flex flex-col items-center bg-black/5 dark:bg-black/20 px-3 py-1.5 border-l-2 border-r-2 border-dashed border-black/20 dark:border-white/10 rounded-sm relative overflow-hidden min-w-[80px]">
-           <div className="absolute top-0 left-0 right-0 h-[1px] bg-black/5"></div>
-           <span className="text-[8px] font-black text-slate-500/60 dark:text-slate-400/60 uppercase tracking-[0.2em] mb-0.5">
+        <div className="flex flex-col">
+           <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">
              {t.watched_label}
            </span>
-           <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-200 tracking-tighter">
-             {new Date(review.createdAt).toLocaleDateString(undefined, { year: '2-digit', month: 'short', day: 'numeric' }).toUpperCase()}
+           <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+             {new Date(review.createdAt).toLocaleDateString(undefined, { year: '2-digit', month: 'short', day: 'numeric' })}
            </span>
-           <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-black/5"></div>
         </div>
         
         <div 
-          className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 mb-1"
+          className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
           data-html2canvas-ignore
         >
-          {/* Edit Button */}
           <button
              onClick={handleEdit}
-             className="p-1.5 text-slate-500 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-900/30 dark:hover:text-brand-400 rounded-full transition-all duration-200 hover:scale-110 active:scale-95"
+             className="w-8 h-8 flex items-center justify-center text-slate-500 hover:bg-black/5 rounded-full transition-colors"
              title="Edit"
           >
-             <Pencil size={16} />
+             <Pencil size={14} />
           </button>
 
           <button 
             onClick={handleShare}
-            className={`p-1.5 rounded-full transition-all duration-200 ${justShared ? 'bg-green-100 text-green-600' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/30'}`}
+            className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${justShared ? 'bg-green-100 text-green-600' : 'text-slate-500 hover:bg-black/5'}`}
             title={t.share_tooltip}
             disabled={isSharing}
           >
-            {isSharing ? <Loader2 size={16} className="animate-spin text-brand-500" /> : justShared ? <Check size={16} /> : <Share2 size={16} />}
+            {isSharing ? <Loader2 size={14} className="animate-spin" /> : justShared ? <Check size={14} /> : <Share2 size={14} />}
           </button>
 
           <button 
             onClick={handleDelete}
-            className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full transition-all duration-200 hover:scale-110 active:scale-95"
+            className="w-8 h-8 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
             title={t.delete_tooltip}
           >
-            <Trash2 size={16} />
+            <Trash2 size={14} />
           </button>
         </div>
       </div>

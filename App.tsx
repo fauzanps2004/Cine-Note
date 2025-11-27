@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from './components/Navbar';
 import { StickyNote } from './components/StickyNote';
@@ -9,7 +8,7 @@ import { UpcomingBanner } from './components/UpcomingBanner';
 import { Review, UserRole, MovieDetails, GamificationState, User, Language } from './types';
 import { GET_LEVEL_MILESTONES, COLOR_VARIANTS, TRANSLATIONS } from './constants';
 import { authService } from './services/authService';
-import { ArrowDownWideNarrow, ArrowUpNarrowWide, Plus, Film } from 'lucide-react';
+import { ArrowDownWideNarrow, ArrowUpNarrowWide, Plus, Film, Sparkles, LayoutDashboard, Loader2 } from 'lucide-react';
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -116,22 +115,22 @@ function App() {
   const handleCloseModal = () => { setIsAddReviewOpen(false); setTimeout(() => setEditingReview(null), 300); };
   const toggleSort = () => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
 
-  if (loadingAuth) return <div className="min-h-screen flex items-center justify-center bg-brand-50 dark:bg-slate-900"><div className="animate-bounce text-brand-500">Loading...</div></div>;
+  if (loadingAuth) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900"><div className="animate-spin text-brand-500"><Loader2 /></div></div>;
 
   if (!user) {
     return (
       <div className={isDark ? 'dark' : ''}>
-        <div className="min-h-screen bg-brand-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-300">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-300">
            <AuthPage onAuthSuccess={handleLogin} language={language} toggleLanguage={toggleLanguage} />
-           <button onClick={() => setIsDark(!isDark)} className="fixed bottom-4 right-4 p-2 rounded-full bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 shadow-lg">{isDark ? "☀️" : "🌙"}</button>
+           <button onClick={() => setIsDark(!isDark)} className="fixed bottom-4 right-4 p-2 rounded-full bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 shadow-lg border border-slate-200 dark:border-slate-700">{isDark ? "☀️" : "🌙"}</button>
         </div>
       </div>
     );
   }
 
-  // DASHBOARD LAYOUT
+  // DASHBOARD LAYOUT (Bento Box Style)
   return (
-    <div className="h-screen w-screen overflow-hidden flex flex-col bg-brand-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-300 animate-fade-in">
+    <div className="h-screen w-screen overflow-hidden flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300 animate-fade-in font-sans">
       
       <Navbar 
         isDark={isDark} toggleTheme={() => setIsDark(!isDark)} stats={stats} user={user} onLogout={handleLogout} reviewCount={reviews.length} language={language} toggleLanguage={toggleLanguage}
@@ -139,52 +138,85 @@ function App() {
 
       <div className="flex-1 flex overflow-hidden w-full max-w-[1920px] mx-auto">
         
-        {/* LEFT SIDEBAR (Widgets) - Hidden on mobile, visible on lg screens */}
-        <aside className="hidden lg:flex flex-col w-[380px] xl:w-[420px] shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white/30 dark:bg-slate-900/30 overflow-y-auto scrollbar-thin p-6 gap-8">
-           <UpcomingBanner language={language} />
-           <MoodRecommender language={language} layout="vertical" />
+        {/* LEFT SIDEBAR (Discovery) */}
+        {/* White background for hierarchy distinction */}
+        <aside className="hidden lg:flex flex-col w-[380px] xl:w-[420px] shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-y-auto scrollbar-thin z-10">
+           <div className="p-6 flex flex-col gap-8">
+              
+              {/* Widget: Upcoming */}
+              <section>
+                 <div className="flex items-center gap-2 mb-4 px-1">
+                    <Sparkles size={16} className="text-brand-500" />
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t.upcoming_title}</h3>
+                 </div>
+                 <UpcomingBanner language={language} />
+              </section>
+
+              {/* Widget: Mood */}
+              <section>
+                 <div className="flex items-center gap-2 mb-4 px-1">
+                    <Film size={16} className="text-brand-500" />
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t.mood_title}</h3>
+                 </div>
+                 <MoodRecommender language={language} layout="vertical" />
+              </section>
+
+           </div>
         </aside>
 
         {/* RIGHT MAIN CONTENT (Diary) */}
-        <main className="flex-1 flex flex-col min-w-0 h-full relative">
+        {/* Slightly off-white/slate background for content area */}
+        <main className="flex-1 flex flex-col min-w-0 h-full relative bg-slate-50/50 dark:bg-slate-950">
           
           {/* Main Header (Sticky) */}
-          <div className="shrink-0 px-4 sm:px-8 pt-6 pb-2 z-10 bg-brand-50/95 dark:bg-slate-900/95 backdrop-blur-sm">
-             {/* Mobile Banner Fallback (Only visible on small screens) */}
-             <div className="lg:hidden mb-6">
+          <div className="shrink-0 px-6 sm:px-10 py-6 z-10 border-b border-slate-200/60 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+             
+             {/* Mobile Widgets */}
+             <div className="lg:hidden mb-8 space-y-6">
                 <UpcomingBanner language={language} />
-                <div className="mt-4"><MoodRecommender language={language} layout="horizontal" /></div>
+                <MoodRecommender language={language} layout="horizontal" />
              </div>
 
-             <div className="flex flex-col sm:flex-row items-end justify-between gap-4 mb-4 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                <div>
-                  <h1 className="text-3xl sm:text-4xl font-bold text-slate-800 dark:text-white mb-2 font-hand">
-                    {t.diary_of} <span className="text-brand-600 dark:text-brand-400">{user.username}</span>
-                  </h1>
-                  <p className="text-slate-500 dark:text-slate-400 flex items-center gap-2">
-                    <Film size={16} />
-                    <span>{reviews.length} {t.films_logged}</span>
-                  </p>
+             <div className="flex flex-col sm:flex-row items-end justify-between gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                <div className="flex items-center gap-4">
+                  {/* Avatar Placeholder / Profile Icon */}
+                  <div className="hidden sm:flex w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 items-center justify-center text-white text-2xl font-bold shadow-lg shadow-brand-500/20">
+                     {user.username.substring(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                      {t.diary_of} <span className="text-brand-600 dark:text-brand-400">{user.username}</span>
+                    </h1>
+                    <div className="flex items-center gap-4 mt-2">
+                       <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                          <LayoutDashboard size={14} className="text-slate-500" />
+                          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{reviews.length} {t.films_logged}</span>
+                       </div>
+                    </div>
+                  </div>
                 </div>
                 
-                <div className="flex gap-3">
-                  <button onClick={toggleSort} className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md transition-all text-sm font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                <div className="flex gap-3 w-full sm:w-auto">
+                  <button 
+                    onClick={toggleSort} 
+                    className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 transition-all text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                  >
                     {sortOrder === 'desc' ? <ArrowDownWideNarrow size={18} /> : <ArrowUpNarrowWide size={18} />}
                     <span className="hidden sm:inline">{sortOrder === 'desc' ? t.sort_newest : t.sort_oldest}</span>
                   </button>
-                  <button onClick={() => setIsAddReviewOpen(true)} className="flex items-center gap-2 px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl shadow-lg shadow-brand-500/20 transition-all hover:scale-105 active:scale-95 text-sm font-bold">
+                  <button 
+                    onClick={() => setIsAddReviewOpen(true)} 
+                    className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-0.5 active:translate-y-0 text-sm font-bold"
+                  >
                     <Plus size={18} strokeWidth={3} />
                     {t.add_review_btn}
                   </button>
                 </div>
              </div>
-             
-             {/* Divider */}
-             <div className="h-px bg-slate-200 dark:bg-slate-800 w-full mb-2"></div>
           </div>
 
           {/* Scrollable Grid */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-8 pt-2 scrollbar-thin">
+          <div className="flex-1 overflow-y-auto p-6 sm:p-10 scrollbar-thin">
             {sortedReviews.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pb-20">
                 {sortedReviews.map((review, index) => (
@@ -194,12 +226,18 @@ function App() {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in text-slate-400 dark:text-slate-500 h-full">
-                <div className="w-24 h-24 mb-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                    <Film size={40} className="opacity-50" />
+              <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fade-in text-slate-400 dark:text-slate-500">
+                <div className="w-24 h-24 mb-6 rounded-3xl bg-slate-100 dark:bg-slate-800/50 flex items-center justify-center shadow-inner">
+                    <Film size={40} className="opacity-30" />
                 </div>
-                <h3 className="text-xl font-bold mb-2 text-slate-600 dark:text-slate-300">{t.empty_title}</h3>
-                <p className="max-w-md">{t.empty_subtitle}</p>
+                <h3 className="text-xl font-bold mb-2 text-slate-700 dark:text-slate-200">{t.empty_title}</h3>
+                <p className="max-w-md text-sm">{t.empty_subtitle}</p>
+                <button 
+                  onClick={() => setIsAddReviewOpen(true)}
+                  className="mt-6 text-brand-600 hover:text-brand-700 font-bold text-sm hover:underline"
+                >
+                  {t.add_review_btn}
+                </button>
               </div>
             )}
           </div>
