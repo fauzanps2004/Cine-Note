@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from './components/Navbar';
 import { StickyNote } from './components/StickyNote';
@@ -154,8 +155,8 @@ function App() {
 
               {/* Widget: Mood */}
               <section>
+                 {/* Removed Film icon as requested */}
                  <div className="flex items-center gap-2 mb-4 px-1">
-                    <Film size={16} className="text-brand-500" />
                     <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t.mood_title}</h3>
                  </div>
                  <MoodRecommender language={language} layout="vertical" />
@@ -169,7 +170,7 @@ function App() {
         <main className="flex-1 flex flex-col min-w-0 h-full relative bg-slate-50/50 dark:bg-slate-950">
           
           {/* Main Header (Sticky) */}
-          <div className="shrink-0 px-6 sm:px-10 py-6 z-10 border-b border-slate-200/60 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+          <div className="shrink-0 px-8 py-6 z-10 border-b border-slate-200/60 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
              
              {/* Mobile Widgets */}
              <div className="lg:hidden mb-8 space-y-6">
@@ -216,7 +217,7 @@ function App() {
           </div>
 
           {/* Scrollable Grid */}
-          <div className="flex-1 overflow-y-auto p-6 sm:p-10 scrollbar-thin">
+          <div className="flex-1 overflow-y-auto px-8 py-10 scrollbar-thin">
             {sortedReviews.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pb-20">
                 {sortedReviews.map((review, index) => (
