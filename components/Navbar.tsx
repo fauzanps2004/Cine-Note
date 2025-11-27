@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Film, Moon, Sun, LogOut, Video, Languages } from 'lucide-react';
+import { Moon, Sun, LogOut, Video, Languages, Film } from 'lucide-react';
 import { GamificationState, User as UserType, UserRole, Language } from '../types';
 import { RankModal } from './RankModal';
 import { RANK_STYLES, TRANSLATIONS } from '../constants';
@@ -40,13 +40,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="w-full max-w-[1920px] mx-auto px-6">
           <div className="flex justify-between items-center">
             
-            {/* Logo */}
+            {/* Logo - Text Only */}
             <div className="flex items-center shrink-0 w-[380px] xl:w-[420px]">
-              <span className="text-xl font-black tracking-tighter text-slate-900 dark:text-white font-sans flex items-center gap-1">
-                <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white">
-                  <Film size={18} strokeWidth={3} />
-                </div>
-                CineNote
+              <span className="text-xl font-black tracking-tighter text-slate-900 dark:text-white font-sans flex items-center gap-1 select-none">
+                Cine<span className="text-brand-600 dark:text-brand-500">Note</span>
               </span>
             </div>
 
