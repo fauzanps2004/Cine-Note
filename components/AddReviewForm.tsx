@@ -2,17 +2,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, Loader2, Star, X, ImageOff, ArrowLeft, Film, CheckCircle } from 'lucide-react';
 import { searchMovies, getMovieDetails } from '../services/movieService';
-import { MovieDetails, MovieSearchResult, Language } from '../types';
+import { MovieDetails, MovieSearchResult, Language, Review } from '../types';
 import { TRANSLATIONS } from '../constants';
 
 interface AddReviewFormProps {
   onAdd: (movie: MovieDetails, rating: number, content: string) => void;
+  onUpdate?: (id: string, movie: MovieDetails, rating: number, content: string) => void;
   isOpen: boolean;
   onClose: () => void;
   language: Language;
+  initialData?: Review | null;
 }
 
-export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onClose, language }) => {
+export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, onUpdate, isOpen, onClose, language, initialData }) => {
   const [step, setStep] = useState<'search' | 'details' | 'review'>('search');
   const [query, setQuery] = useState('');
   
@@ -32,15 +34,41 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
   const inputRef = useRef<HTMLInputElement>(null);
   const t = TRANSLATIONS[language];
 
-  // Focus input when opened
+  // Initialize form state based on mode (Add vs Edit)
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 100);
+      if (initialData) {
+        // EDIT MODE: Pre-fill data
+        setSelectedMovie(initialData.movieDetails);
+        setRating(initialData.userRating);
+        setContent(initialData.content);
+        setJustWatched(!initialData.content || initialData.content.trim() === '');
+        setStep('review'); // Skip directly to review step
+        setQuery(''); 
+        setSearchResults([]);
+      } else {
+        // ADD MODE: Reset to default
+        // We only reset if we aren't already partway through a flow (which shouldn't happen if onClose clears state in parent, but good safety)
+        if (!selectedMovie) {
+          setStep('search');
+          setQuery('');
+          setRating(3);
+          setContent('');
+          setJustWatched(false);
+          setTimeout(() => inputRef.current?.focus(), 100);
+        }
+      }
+      setError('');
+      setShowSuccess(false);
+      setImgError({});
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   // Debounce Search Logic
   useEffect(() => {
+    // Only search if we are in the search step and query changed
+    if (step !== 'search') return;
+
     const delayDebounceFn = setTimeout(async () => {
       if (query.trim()) {
         setLoading(true);
@@ -58,10 +86,10 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
       } else {
         setSearchResults([]);
       }
-    }, 500); // Reduced to 500ms for better responsiveness
+    }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [query]);
+  }, [query, step]);
 
   const resetForm = () => {
     setStep('search');
@@ -103,8 +131,16 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
   const handleSubmitReview = () => {
     // Allow submission if content exists OR if "justWatched" is enabled
     if (selectedMovie && (content.trim() || justWatched)) {
-      // Add review immediately (send empty string if justWatched)
-      onAdd(selectedMovie, rating, justWatched ? "" : content);
+      
+      const finalContent = justWatched ? "" : content;
+
+      if (initialData && onUpdate) {
+        // Update existing
+        onUpdate(initialData.id, selectedMovie, rating, finalContent);
+      } else {
+        // Add new
+        onAdd(selectedMovie, rating, finalContent);
+      }
       
       // Show success state
       setShowSuccess(true);
@@ -125,7 +161,8 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-brand-50/50 dark:bg-slate-800 sticky top-0 z-10">
           <div className="flex items-center gap-2">
-            {!showSuccess && step !== 'search' && (
+            {!showSuccess && step !== 'search' && !initialData && (
+              // Only show back button if NOT editing (editing locks the movie)
               <button 
                 onClick={() => {
                     if (step === 'review') setStep('details');
@@ -139,9 +176,10 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
             <h2 className="text-lg font-bold text-slate-800 dark:text-white">
               {showSuccess ? t.saved_title : (
                 <>
-                  {step === 'search' && t.header_search}
-                  {step === 'details' && t.header_details}
-                  {step === 'review' && t.header_review}
+                  {initialData && t.header_review} 
+                  {!initialData && step === 'search' && t.header_search}
+                  {!initialData && step === 'details' && t.header_details}
+                  {!initialData && step === 'review' && t.header_review}
                 </>
               )}
             </h2>
@@ -194,7 +232,7 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
                     {!loading && searchResults.length === 0 && query.trim() && (
                         <div className="text-center text-slate-400 py-8 flex flex-col items-center">
                            <Film className="mb-2 opacity-50" size={32} />
-                           <p className="text-sm">{t.searching} "{query}"...</p>
+                           <p className="text-sm">{t.no_results || t.searching}</p>
                         </div>
                     )}
                     
@@ -293,6 +331,20 @@ export const AddReviewForm: React.FC<AddReviewFormProps> = ({ onAdd, isOpen, onC
               {/* STEP 3: WRITE REVIEW */}
               {step === 'review' && (
                 <div className="space-y-4 animate-fade-in">
+                  
+                  {/* Movie Info Short (Edit Mode Only) */}
+                  {initialData && selectedMovie && (
+                     <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-100 dark:border-slate-700 mb-2">
+                        <div className="w-10 h-14 bg-slate-200 rounded shrink-0 overflow-hidden">
+                           {selectedMovie.posterUrl && <img src={selectedMovie.posterUrl} className="w-full h-full object-cover" />}
+                        </div>
+                        <div>
+                           <h4 className="font-bold text-sm text-slate-800 dark:text-white leading-tight">{selectedMovie.title}</h4>
+                           <span className="text-xs text-slate-500">{selectedMovie.year}</span>
+                        </div>
+                     </div>
+                  )}
+
                   <div className="flex flex-col items-center mb-4">
                     <label className="text-sm font-medium text-slate-500 mb-2">{t.rating_label}</label>
                     <div className="flex gap-2">

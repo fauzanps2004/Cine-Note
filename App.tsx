@@ -34,6 +34,7 @@ function App() {
 
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [isAddReviewOpen, setIsAddReviewOpen] = useState(false);
+  const [editingReview, setEditingReview] = useState<Review | null>(null);
 
   const t = TRANSLATIONS[language];
 
@@ -182,8 +183,33 @@ function App() {
     setReviews(prev => [newReview, ...prev]);
   };
 
+  const handleUpdateReview = (id: string, movie: MovieDetails, rating: number, content: string) => {
+    setReviews(prev => prev.map(review => {
+      if (review.id === id) {
+        return {
+          ...review,
+          movieDetails: movie, // Usually movie doesn't change during edit, but passed for consistency
+          userRating: rating,
+          content: content
+        };
+      }
+      return review;
+    }));
+  };
+
   const handleDeleteReview = (id: string) => {
     setReviews(prev => prev.filter(r => r.id !== id));
+  };
+
+  const handleEditClick = (review: Review) => {
+    setEditingReview(review);
+    setIsAddReviewOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsAddReviewOpen(false);
+    // Clear editing review after a short delay so modal animation finishes without data jump
+    setTimeout(() => setEditingReview(null), 300);
   };
 
   const toggleSort = () => {
@@ -315,6 +341,7 @@ function App() {
                 review={review} 
                 index={index} 
                 onDelete={handleDeleteReview} 
+                onEdit={handleEditClick}
                 language={language}
               />
             </div>
@@ -328,9 +355,11 @@ function App() {
 
       <AddReviewForm 
         onAdd={handleAddReview} 
+        onUpdate={handleUpdateReview}
         isOpen={isAddReviewOpen}
-        onClose={() => setIsAddReviewOpen(false)}
+        onClose={handleCloseModal}
         language={language}
+        initialData={editingReview}
       />
     </div>
   );

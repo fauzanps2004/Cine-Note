@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { Trash2, Star, Quote, ImageOff, Share2, Check, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { Trash2, Star, Quote, ImageOff, Share2, Check, ChevronDown, ChevronUp, Loader2, Pencil } from 'lucide-react';
 import { Review, Language } from '../types';
 import { STICKY_COLORS, STICKY_ROTATIONS, TRANSLATIONS } from '../constants';
 import html2canvas from 'html2canvas';
@@ -8,11 +8,12 @@ import html2canvas from 'html2canvas';
 interface StickyNoteProps {
   review: Review;
   onDelete: (id: string) => void;
+  onEdit: (review: Review) => void;
   index: number;
   language: Language;
 }
 
-export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index, language }) => {
+export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, onEdit, index, language }) => {
   const rotation = STICKY_ROTATIONS[index % STICKY_ROTATIONS.length];
   const colorClasses = STICKY_COLORS[review.colorVariant];
   const [imgError, setImgError] = useState(false);
@@ -36,13 +37,15 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index,
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Trigger animation immediately without blocking confirm dialog
     setIsDeleting(true);
-    
-    // Wait for animation (300ms) to complete before removing from data
     setTimeout(() => {
       onDelete(review.id);
     }, 300);
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit(review);
   };
 
   const handleShare = async (e: React.MouseEvent) => {
@@ -58,12 +61,11 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index,
         : `🎬 ${review.movieDetails.title} (${review.movieDetails.year})\n${stars}\n\n${t.just_watched_watermark}`;
 
     try {
-      // Try to capture image
       if (noteRef.current) {
         const canvas = await html2canvas(noteRef.current, {
-          useCORS: true, // Attempt to load cross-origin images (posters)
-          scale: 2, // Higher resolution for retina displays
-          backgroundColor: null, // Transparent background
+          useCORS: true,
+          scale: 2,
+          backgroundColor: null,
           logging: false,
         });
 
@@ -71,7 +73,6 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index,
           if (blob) {
             const file = new File([blob], `cinenote-${review.movieDetails.title.replace(/\s+/g, '-').toLowerCase()}.png`, { type: 'image/png' });
             
-            // Check if the browser supports sharing files
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
               await navigator.share({
                 files: [file],
@@ -80,7 +81,6 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index,
               });
               setJustShared(true);
             } else {
-              // Fallback: Download the image
               const link = document.createElement('a');
               link.download = `review-${review.movieDetails.title}.png`;
               link.href = canvas.toDataURL();
@@ -96,7 +96,6 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index,
       }
     } catch (err) {
       console.warn('Image generation failed, falling back to text share:', err);
-      // Fallback to text sharing
       try {
         if (navigator.share) {
           await navigator.share({
@@ -132,7 +131,6 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index,
 
       {/* Header: Poster & Info */}
       <div className="flex gap-3 mb-4 pb-3 border-b border-black/5">
-        {/* Poster Thumbnail */}
         <div className="shrink-0 w-20 h-28 bg-slate-200 dark:bg-slate-800 rounded shadow-sm overflow-hidden relative">
           {!imgError && review.movieDetails.posterUrl ? (
             <img 
@@ -140,8 +138,6 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index,
               alt={review.movieDetails.title} 
               className="w-full h-full object-cover"
               onError={() => setImgError(true)}
-              // Note: standard img tag doesn't use crossorigin here to avoid UI breakage if CORS fails,
-              // html2canvas will attempt to fetch it with CORS enabled internally via useCORS option.
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-slate-400">
@@ -150,7 +146,6 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index,
           )}
         </div>
 
-        {/* Info */}
         <div className="flex-1 min-w-0 flex flex-col py-0.5">
           <div>
              <h3 className="font-bold text-lg leading-tight text-slate-800 dark:text-slate-100 line-clamp-2 font-hand tracking-wide">
@@ -161,7 +156,6 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index,
             </span>
           </div>
           
-          {/* Genre Tags */}
           <div className="flex flex-wrap gap-1 mt-2 mb-auto">
              {review.movieDetails.genre.slice(0, 2).map(g => (
                <span key={g} className="text-[10px] px-1.5 py-0.5 bg-black/5 dark:bg-white/10 rounded text-slate-600 dark:text-slate-300 border border-black/5">
@@ -170,7 +164,6 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index,
              ))}
           </div>
 
-          {/* 3D Sticker Style Stars */}
           <div className="flex items-center gap-1 mt-2">
             <div className="flex gap-0.5">
               {[...Array(5)].map((_, i) => (
@@ -214,7 +207,7 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index,
           <button 
             onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
             className="mt-2 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-1 uppercase tracking-wider self-start transition-colors"
-            data-html2canvas-ignore // Ignore read more button in screenshot
+            data-html2canvas-ignore
           >
             {isExpanded ? (
               <>{t.close} <ChevronUp size={12} /></>
@@ -228,39 +221,37 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ review, onDelete, index,
       {/* Footer: Ticket Stub & Actions */}
       <div className="mt-3 pt-2 flex justify-between items-end shrink-0">
         
-        {/* Ticket Stub Date Design */}
         <div className="flex flex-col items-center bg-black/5 dark:bg-black/20 px-3 py-1.5 border-l-2 border-r-2 border-dashed border-black/20 dark:border-white/10 rounded-sm relative overflow-hidden min-w-[80px]">
-           {/* Ticket Top Line */}
            <div className="absolute top-0 left-0 right-0 h-[1px] bg-black/5"></div>
-           
            <span className="text-[8px] font-black text-slate-500/60 dark:text-slate-400/60 uppercase tracking-[0.2em] mb-0.5">
              {t.watched_label}
            </span>
            <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-200 tracking-tighter">
              {new Date(review.createdAt).toLocaleDateString(undefined, { year: '2-digit', month: 'short', day: 'numeric' }).toUpperCase()}
            </span>
-
-           {/* Ticket Bottom Line */}
            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-black/5"></div>
         </div>
         
         <div 
           className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 mb-1"
-          data-html2canvas-ignore // Don't include action buttons in the screenshot
+          data-html2canvas-ignore
         >
+          {/* Edit Button */}
+          <button
+             onClick={handleEdit}
+             className="p-1.5 text-slate-500 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-900/30 dark:hover:text-brand-400 rounded-full transition-all duration-200 hover:scale-110 active:scale-95"
+             title="Edit"
+          >
+             <Pencil size={16} />
+          </button>
+
           <button 
             onClick={handleShare}
             className={`p-1.5 rounded-full transition-all duration-200 ${justShared ? 'bg-green-100 text-green-600' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/30'}`}
             title={t.share_tooltip}
             disabled={isSharing}
           >
-            {isSharing ? (
-              <Loader2 size={16} className="animate-spin text-brand-500" />
-            ) : justShared ? (
-              <Check size={16} />
-            ) : (
-              <Share2 size={16} />
-            )}
+            {isSharing ? <Loader2 size={16} className="animate-spin text-brand-500" /> : justShared ? <Check size={16} /> : <Share2 size={16} />}
           </button>
 
           <button 
